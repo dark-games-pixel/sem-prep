@@ -1,15 +1,15 @@
 // ===== Paste your YouTube links (or IDs) here after uploading. Leave "" until then. =====
 window.VIDEOS = {
-  p01: { yt: "", title: "Part 1 · Artificial Neuron, Perceptron, Gradient Descent", dur: "3:10" },
-  p02: { yt: "", title: "Part 2 · Activation functions, Hebb rule, XOR", dur: "2:57" },
-  p03: { yt: "", title: "Part 3 · ADALINE, Forward pass, Backpropagation, Convergence", dur: "3:21" },
-  p04: { yt: "", title: "Part 4 · Competitive learning, SOM, ART, Hopfield", dur: "2:49" },
-  p05: { yt: "", title: "Part 5 · Unsupervised DL & Autoencoders", dur: "2:00" },
-  p06: { yt: "", title: "Part 6 · CNN building blocks & Transfer learning", dur: "3:19" },
-  p07: { yt: "", title: "Part 7 · Bayes, Decision surfaces, Linear machine, Hinge loss", dur: "2:43" },
-  p08: { yt: "", title: "Part 8 · Batch/SGD, Momentum, RMSProp, Adam", dur: "2:29" },
-  p09: { yt: "", title: "Part 9 · Detection, Segmentation, RNN, LSTM", dur: "2:21" },
-  p10: { yt: "", title: "Part 10 · VAE & GAN", dur: "2:31" }
+  p01: { yt: "https://youtu.be/b4vg4n7SfQk", title: "Part 1 · Artificial Neuron, Perceptron, Gradient Descent", dur: "5:37" },
+  p02: { yt: "https://youtu.be/TPytVlRZPTo", title: "Part 2 · Activation functions, Hebb rule, XOR", dur: "4:53" },
+  p03: { yt: "https://youtu.be/XF4SJRIQTzI", title: "Part 3 · ADALINE, Forward pass, Backpropagation, Convergence", dur: "6:33" },
+  p04: { yt: "https://youtu.be/dtGIpbqyf7Y", title: "Part 4 · Competitive learning, SOM, ART, Hopfield", dur: "4:17" },
+  p05: { yt: "https://youtu.be/coDerDOfBjY", title: "Part 5 · Unsupervised DL & Autoencoders", dur: "2:46" },
+  p06: { yt: "https://youtu.be/lckc-48iIw4", title: "Part 6 · CNN building blocks & Transfer learning", dur: "5:20" },
+  p07: { yt: "https://youtu.be/KrqiN70s924", title: "Part 7 · Bayes, Decision surfaces, Linear machine, Hinge loss", dur: "5:05" },
+  p08: { yt: "https://youtu.be/1nCgRMGhj2g", title: "Part 8 · Batch/SGD, Momentum, RMSProp, Adam", dur: "5:12" },
+  p09: { yt: "https://youtu.be/SLW8qJuwvHc", title: "Part 9 · Detection, Segmentation, RNN, LSTM", dur: "3:59" },
+  p10: { yt: "https://youtu.be/NOe3IMfRolo", title: "Part 10 · VAE & GAN", dur: "3:59" }
 };
 
 window.FLASH = [

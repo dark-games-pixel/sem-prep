@@ -4,12 +4,16 @@ service cloud.firestore {
     function signedIn() { return request.auth != null; }
     function isMe(uid) { return signedIn() && request.auth.uid == uid; }
     function validModule(m) { return m in ['m1', 'm2', 'm3', 'm4', 'm5']; }
+    // Site owner(s): can read all usage data. Google accounts always have verified emails.
+    function isAdmin() { return signedIn() && request.auth.token.email_verified == true && request.auth.token.email.lower() in ['ha9329187@gmail.com']; }
 
     // Profile + progress: only the owner can read/write their own document.
     match /users/{uid} {
-      allow read: if isMe(uid);
+      allow read: if isMe(uid) || isAdmin();
       allow create, update: if isMe(uid)
-        && request.resource.data.keys().hasOnly(['name', 'email', 'photo', 'createdAt', 'lastSeen', 'done', 'best', 'attempts'])
+        && request.resource.data.keys().hasOnly(['name', 'email', 'photo', 'createdAt', 'lastSeen', 'done', 'best', 'attempts', 'minutes', 'visits', 'moduleViews'])
+        && (!('minutes' in request.resource.data) || request.resource.data.minutes is number)
+        && (!('moduleViews' in request.resource.data) || request.resource.data.moduleViews is map)
         && (!('best' in request.resource.data) || (request.resource.data.best is int && request.resource.data.best >= 0 && request.resource.data.best <= 100))
         && (!('done' in request.resource.data) || request.resource.data.done is map);
       allow delete: if false;
@@ -23,8 +27,19 @@ service cloud.firestore {
         && request.resource.data.module is int && request.resource.data.module >= 0 && request.resource.data.module <= 5
         && request.resource.data.total is int && request.resource.data.total > 0 && request.resource.data.total <= 100
         && request.resource.data.score is int && request.resource.data.score >= 0 && request.resource.data.score <= request.resource.data.total;
-      allow read: if signedIn() && resource.data.uid == request.auth.uid;
+      allow read: if (signedIn() && resource.data.uid == request.auth.uid) || isAdmin();
       allow update, delete: if false;
+    }
+
+    // Daily activity: one doc per student per day (id = <YYYY-MM-DD>_<uid>), minutes counted by the page heartbeat.
+    match /daily/{did} {
+      allow create, update: if signedIn()
+        && did == request.resource.data.date + '_' + request.auth.uid
+        && request.resource.data.uid == request.auth.uid
+        && request.resource.data.keys().hasOnly(['uid', 'date', 'minutes', 'at'])
+        && request.resource.data.minutes is number && request.resource.data.minutes <= 1440;
+      allow read: if isAdmin() || (signedIn() && resource.data.uid == request.auth.uid);
+      allow delete: if false;
     }
 
     // Module reviews: any signed-in student can read; one review per user per module (doc id = <module>_<uid>).

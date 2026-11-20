@@ -1,7 +1,7 @@
 // Firebase layer: Google Auth gate + Firestore (progress, quiz attempts, module reviews).
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 import { getAuth, GoogleAuthProvider, signInWithPopup, signInWithRedirect, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
-import { getFirestore, doc, getDoc, setDoc, addDoc, deleteDoc, collection, query, where, orderBy, limit, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+import { getFirestore, doc, getDoc, setDoc, addDoc, deleteDoc, collection, query, where, orderBy, limit, getDocs, serverTimestamp, increment } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 import { firebaseConfig } from "./firebase-config.js";
 
 const gate = document.getElementById("gate");
@@ -25,10 +25,42 @@ document.getElementById("google-btn").addEventListener("click", async () => {
 });
 
 const MODULES = ["m1", "m2", "m3", "m4", "m5"];
+export const ADMIN_EMAILS = ["ha9329187@gmail.com"];
+const today = () => new Date(Date.now() + 5.5 * 3600e3).toISOString().slice(0, 10); // IST date
+const isAdmin = () => !!auth.currentUser && ADMIN_EMAILS.includes((auth.currentUser.email || "").toLowerCase());
+
+// ---- usage tracking: 1 "minute" is counted only while the tab is visible and the user was active recently ----
+let lastActivity = Date.now(), beat = null;
+["pointerdown", "keydown", "scroll", "touchstart"].forEach(e => addEventListener(e, () => { lastActivity = Date.now(); }, { passive: true }));
+function startHeartbeat() {
+  if (beat) return;
+  beat = setInterval(async () => {
+    if (!auth.currentUser || document.visibilityState !== "visible" || Date.now() - lastActivity > 3 * 60e3) return;
+    const uid = auth.currentUser.uid, d = today();
+    try {
+      await setDoc(doc(db, "users", uid), { minutes: increment(1), lastSeen: serverTimestamp() }, { merge: true });
+      await setDoc(doc(db, "daily", `${d}_${uid}`), { uid, date: d, minutes: increment(1), at: serverTimestamp() }, { merge: true });
+    } catch (e) { /* offline: ignore */ }
+  }, 60e3);
+}
 let profile = null;
 
 window.DB = {
+  isAdmin,
   user: () => auth.currentUser,
+  async viewModule(moduleId) {
+    if (!MODULES.includes(moduleId)) return;
+    try { await setDoc(doc(db, "users", auth.currentUser.uid), { moduleViews: { [moduleId]: increment(1) }, lastSeen: serverTimestamp() }, { merge: true }); } catch (e) {}
+  },
+  async adminData() {
+    if (!isAdmin()) throw new Error("Not an admin");
+    const since = new Date(Date.now() - 30 * 864e5 + 5.5 * 3600e3).toISOString().slice(0, 10);
+    const [u, q, r, d] = await Promise.all([
+      getDocs(collection(db, "users")), getDocs(query(collection(db, "quizAttempts"), orderBy("at", "desc"), limit(3000))),
+      getDocs(collection(db, "reviews")), getDocs(query(collection(db, "daily"), where("date", ">=", since)))]);
+    const rows = s => s.docs.map(x => ({ id: x.id, ...x.data() }));
+    return { users: rows(u), attempts: rows(q), reviews: rows(r), daily: rows(d) };
+  },
   profile: () => profile,
   signOut: () => signOut(auth),
   async setDone(moduleId, value) {
@@ -77,7 +109,9 @@ onAuthStateChanged(auth, async user => {
   try {
     const snap = await getDoc(ref);
     profile = snap.exists() ? snap.data() : { done: {}, best: 0, attempts: 0 };
-    await setDoc(ref, { name: user.displayName || "", email: user.email || "", photo: user.photoURL || "", lastSeen: serverTimestamp(), ...(snap.exists() ? {} : { createdAt: serverTimestamp(), done: {}, best: 0, attempts: 0 }) }, { merge: true });
+    await setDoc(ref, { name: user.displayName || "", email: user.email || "", photo: user.photoURL || "", lastSeen: serverTimestamp(), visits: increment(1), ...(snap.exists() ? {} : { createdAt: serverTimestamp(), done: {}, best: 0, attempts: 0, minutes: 0 }) }, { merge: true });
+    await setDoc(doc(db, "daily", `${today()}_${user.uid}`), { uid: user.uid, date: today(), minutes: increment(0), at: serverTimestamp() }, { merge: true });
+    startHeartbeat();
   } catch (e) {
     console.error(e); profile = { done: {}, best: 0, attempts: 0 };
     gateMsg.textContent = "Signed in, but Firestore is not reachable (check rules/deploy). Progress will not be saved.";
