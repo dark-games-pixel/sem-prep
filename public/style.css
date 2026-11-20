@@ -273,19 +273,35 @@ section[id]{scroll-margin-top:120px}
 }
 .vgrid{grid-template-columns:repeat(auto-fill,minmax(400px,1fr))}@media (max-width:760px){.vgrid{grid-template-columns:1fr}}
 
-/* ---------- fullscreen double-tap seek ---------- */
+/* ---------- clean player: YouTube UI hidden, our gestures ---------- */
+.vcard.player .yt{overflow:hidden;background:#0d1117}
+.vcard.player .yt iframe{border:0}
 .vzone,.vexit{display:none}
-.yt:fullscreen .vzone,.yt:-webkit-full-screen .vzone,.vcard.vfull .vzone{display:flex}
-.vzone{position:absolute;top:0;bottom:64px;width:34%;z-index:3;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none}
-.vzone.l{left:0}.vzone.r{right:0}
-.vrip{opacity:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px;color:#fff;font:600 30px Inter;width:130px;height:130px;justify-content:center;border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(2px)}
-.vrip b{font-size:15px}
-.vrip.show{animation:vrip .75s ease-out}
+.vcard.ready .vzone{display:flex}
+.vzone{position:absolute;top:0;bottom:0;z-index:3;align-items:center;justify-content:center;touch-action:manipulation;-webkit-tap-highlight-color:transparent;user-select:none;-webkit-user-select:none;cursor:pointer}
+.vzone.l{left:0;width:34%}.vzone.r{right:0;width:34%}.vzone.c{left:34%;width:32%}
+.vrip{opacity:0;pointer-events:none;display:flex;flex-direction:column;align-items:center;gap:4px;color:#fff;font:600 28px Inter;width:120px;height:120px;justify-content:center;border-radius:50%;background:rgba(255,255,255,.18);backdrop-filter:blur(2px)}
+.vrip b{font-size:15px}.vrip.show{animation:vrip .75s ease-out}
 @keyframes vrip{0%{opacity:0;transform:scale(.7)}15%{opacity:1;transform:scale(1)}70%{opacity:1}100%{opacity:0;transform:scale(1.08)}}
-.vcard.vfull .vexit,.yt:fullscreen .vexit,.yt:-webkit-full-screen .vexit{display:grid;place-items:center;position:absolute;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:4;width:40px;height:40px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:18px;cursor:pointer}
-.yt:fullscreen,.yt:-webkit-full-screen{width:100%;height:100%;padding:0!important;aspect-ratio:auto}
-.yt:fullscreen>div[id^=yt-],.yt:fullscreen iframe{position:absolute;inset:0;width:100%!important;height:100%!important}
-/* iPhone: page-level fullscreen so taps still reach the zones */
-.vcard.vfull .yt{position:fixed!important;inset:0;z-index:9999;width:100vw;height:100dvh;aspect-ratio:auto;padding:0!important;background:#000;border-radius:0}
-.vcard.vfull .yt iframe{position:absolute;inset:0;width:100%!important;height:100%!important}
+/* paused / ended: our own big button, nothing from YouTube */
+.vstate{width:72px;height:72px;border-radius:50%;background:var(--accent);display:none;place-items:center;pointer-events:none;box-shadow:0 10px 30px -8px rgba(0,0,0,.6)}
+.vstate::before{content:"";margin-left:5px;border-style:solid;border-width:13px 0 13px 21px;border-color:transparent transparent transparent #fff}
+.vcard.paused .vstate,.vcard.ended .vstate{display:grid}
+.vcard.ended .yt::after{content:"";position:absolute;inset:0;z-index:2;background:#0d1117}
+.vcard.ended .vstate::before{content:"↺";border:0;margin:0;color:#fff;font:600 30px Inter}
+/* fullscreen = the whole card: video fills, our control bar floats at the bottom */
+.vcard.player:fullscreen,.vcard.player:-webkit-full-screen,.vcard.player.vfull{position:fixed;inset:0;z-index:9999;width:100vw;height:100dvh;margin:0;border:0;border-radius:0;background:#000;display:flex;flex-direction:column}
+.vcard.player:fullscreen .yt,.vcard.player:-webkit-full-screen .yt,.vcard.player.vfull .yt{flex:1;aspect-ratio:auto;height:auto;background:#000}
+.vcard.player:fullscreen .vmeta,.vcard.player:fullscreen .vbtns.two,.vcard.player.vfull .vmeta,.vcard.player.vfull .vbtns.two{display:none}
+.vcard.player:fullscreen .vctl,.vcard.player.vfull .vctl{position:absolute;left:0;right:0;bottom:0;z-index:5;background:linear-gradient(transparent,rgba(0,0,0,.85) 40%);border:0;padding:30px max(16px,env(safe-area-inset-right)) max(10px,env(safe-area-inset-bottom)) max(16px,env(safe-area-inset-left));transition:opacity .3s}
+.vcard.player:fullscreen .vseek,.vcard.player.vfull .vseek{color:#e8e8e8}
+.vcard.player:fullscreen .vb,.vcard.player.vfull .vb{background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.18);color:#fff}
+.vcard.player:fullscreen .vspeed,.vcard.player.vfull .vspeed{border-color:rgba(255,255,255,.18)}
+.vcard.player:fullscreen .vspeed .vb.on,.vcard.player.vfull .vspeed .vb.on{background:rgba(255,255,255,.3)}
+.vcard.player:fullscreen .vplay,.vcard.player.vfull .vplay{background:var(--primary);border-color:var(--primary)}
+.vcard.player:fullscreen .vbtns,.vcard.player.vfull .vbtns{flex-wrap:nowrap;margin:8px 0 2px}
+.vcard.player:fullscreen .vspeed,.vcard.player.vfull .vspeed{order:0;width:auto}
+.vcard.player:fullscreen .vzone,.vcard.player.vfull .vzone{bottom:110px}
+.vcard.player.idle .vctl,.vcard.player.idle .vexit{opacity:0;pointer-events:none}.vcard.player.idle{cursor:none}
+.vcard.player:fullscreen .vexit,.vcard.player:-webkit-full-screen .vexit,.vcard.player.vfull .vexit{display:grid;place-items:center;position:absolute;top:max(12px,env(safe-area-inset-top));right:max(12px,env(safe-area-inset-right));z-index:6;width:42px;height:42px;border-radius:50%;border:0;background:rgba(0,0,0,.55);color:#fff;font-size:18px;cursor:pointer;transition:opacity .3s}
 body.vlock{overflow:hidden}

@@ -27,7 +27,7 @@ function videoCard(key) {
   if (!id) return `<article class="vcard"><div class="yt placeholder"><div><div class="play">▶</div><b>Video coming soon</b></div></div><div class="vmeta"><b>${esc(v.title)}</b><span>${v.dur}</span></div></article>`;
   const keys = VKEYS(), idx = keys.indexOf(key), next = keys[idx + 1];
   return `<article class="vcard player ${watched ? "watched" : ""}" data-key="${key}">
-    <div class="yt"><div id="yt-${key}" data-yt="${id}"></div><div class="vzone l" aria-hidden="true"><span class="vrip">⟲ <b>10s</b></span></div><div class="vzone r" aria-hidden="true"><span class="vrip">⟳ <b>10s</b></span></div><button class="vexit" aria-label="Exit fullscreen">✕</button><button class="vcover" aria-label="Play ${esc(v.title)}"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy"><span class="bigplay">▶</span><span class="vdur">${v.dur}</span></button></div>
+    <div class="yt"><div id="yt-${key}" data-yt="${id}"></div><div class="vzone c" aria-hidden="true"><span class="vstate"></span></div><div class="vzone l" aria-hidden="true"><span class="vrip">⟲ <b>10s</b></span></div><div class="vzone r" aria-hidden="true"><span class="vrip">⟳ <b>10s</b></span></div><button class="vexit" aria-label="Exit fullscreen">✕</button><button class="vcover" aria-label="Play ${esc(v.title)}"><img src="https://i.ytimg.com/vi/${id}/hqdefault.jpg" alt="" loading="lazy"><span class="bigplay">▶</span><span class="vdur">${v.dur}</span></button></div>
     <div class="vctl" hidden>
       <div class="vseek"><span class="vcur">0:00</span><input type="range" class="vbar" min="0" max="1000" value="0" aria-label="Seek"><span class="vtot">${v.dur}</span></div>
       <div class="vbtns">
@@ -42,12 +42,18 @@ function videoCard(key) {
         <button class="vb vrestart">↺ Restart</button>
         <button class="vb vdone">${watched ? "✓ Watched" : "Mark as watched"}</button>
         ${next ? `<button class="vb vnext" data-next="${next}">Next part →</button>` : ""}
-        <a class="vb" href="https://youtu.be/${id}" target="_blank" rel="noopener">Open on YouTube ↗</a>
       </div>
     </div>
     <div class="vmeta"><b>${esc(v.title)}</b><span>${v.dur} · Hinglish voice · animated${watched ? ' · <em class="ok">✓ watched</em>' : ""}</span></div>
   </article>`;
 }
+function fitYT(card) {
+  const box = card.querySelector(".yt"), f = box && box.querySelector("iframe"); if (!f) return;
+  const W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
+  const vw = Math.min(W, H * 16 / 9), vh = vw * 9 / 16, pad = Math.max(90, Math.round(vh * 0.22));
+  Object.assign(f.style, { position: "absolute", right: "auto", bottom: "auto", width: vw + "px", height: (vh + 2 * pad) + "px", left: ((W - vw) / 2) + "px", top: ((H - vh) / 2 - pad) + "px", pointerEvents: "none" });
+}
+window.addEventListener("resize", () => document.querySelectorAll(".vcard.player.ready").forEach(fitYT));
 let ytReady = null; const players = {};
 function loadYT() {
   if (ytReady) return ytReady;
@@ -63,9 +69,9 @@ function initVideos(root = document) {
       loadYT().then(() => {
         const resume = vstore.get("pos_" + key, 0);
         const pl = new YT.Player(holder.id, { videoId: holder.dataset.yt, host: "https://www.youtube-nocookie.com",
-          playerVars: { rel: 0, modestbranding: 1, playsinline: 1, start: resume > 5 ? Math.floor(resume) : 0, autoplay: 1, controls: 1 },
-          events: { onReady: e => { players[key] = e.target; cover.remove(); ctl.hidden = false; e.target.playVideo(); wire(card, key, e.target); if (resume > 5) toast(`Resumed from ${fmtT(resume)}`); },
-                    onStateChange: e => { card.querySelector(".vplay").textContent = e.data === 1 ? "❚❚" : "▶"; if (e.data === 1) Object.entries(players).forEach(([k, o]) => { if (k !== key && o.pauseVideo) try { o.pauseVideo(); } catch (x) {} });
+          playerVars: { rel: 0, modestbranding: 1, playsinline: 1, start: resume > 5 ? Math.floor(resume) : 0, autoplay: 1, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, cc_load_policy: 0, showinfo: 0 },
+          events: { onReady: e => { players[key] = e.target; cover.remove(); card.classList.add("ready"); fitYT(card); ctl.hidden = false; e.target.playVideo(); wire(card, key, e.target); if (resume > 5) toast(`Resumed from ${fmtT(resume)}`); },
+                    onStateChange: e => { card.classList.toggle("playing", e.data === 1); card.classList.toggle("paused", e.data === 2); card.classList.toggle("ended", e.data === 0); fitYT(card); card.querySelector(".vplay").textContent = e.data === 1 ? "❚❚" : "▶"; if (e.data === 1) Object.entries(players).forEach(([k, o]) => { if (k !== key && o.pauseVideo) try { o.pauseVideo(); } catch (x) {} });
                       if (e.data === 0) { markWatched(key, card); vstore.set("pos_" + key, 0); const n = card.querySelector(".vnext"); if (n) n.classList.add("pulse"); } } } });
       });
     };
@@ -84,15 +90,20 @@ function wire(card, key, p) {
   $c(".vmute").onclick = () => { if (p.isMuted()) { p.unMute(); $c(".vmute").textContent = "🔊"; } else { p.mute(); $c(".vmute").textContent = "🔇"; } };
   $c(".vvol").oninput = e => { p.setVolume(+e.target.value); if (+e.target.value === 0) p.mute(); else p.unMute(); $c(".vmute").textContent = +e.target.value === 0 ? "🔇" : "🔊"; };
   const yt = card.querySelector(".yt");
-  const isFull = () => document.fullscreenElement === yt || document.webkitFullscreenElement === yt || card.classList.contains("vfull");
+  const isFull = () => document.fullscreenElement === card || document.webkitFullscreenElement === card || card.classList.contains("vfull");
   const exitFull = () => { if (card.classList.contains("vfull")) { card.classList.remove("vfull"); document.body.classList.remove("vlock"); } else if (document.exitFullscreen) document.exitFullscreen(); else if (document.webkitExitFullscreen) document.webkitExitFullscreen(); };
-  const enterFull = () => { const f = yt.requestFullscreen || yt.webkitRequestFullscreen;
-    if (f) { Promise.resolve(f.call(yt)).then(() => { try { screen.orientation && screen.orientation.lock && screen.orientation.lock("landscape").catch(() => {}); } catch (e) {} }).catch(() => { card.classList.add("vfull"); document.body.classList.add("vlock"); }); }
+  const enterFull = () => { const f = card.requestFullscreen || card.webkitRequestFullscreen;
+    if (f) { Promise.resolve(f.call(card)).then(() => { try { screen.orientation && screen.orientation.lock && screen.orientation.lock("landscape").catch(() => {}); } catch (e) {} }).catch(() => { card.classList.add("vfull"); document.body.classList.add("vlock"); }); }
     else { card.classList.add("vfull"); document.body.classList.add("vlock"); } };
   $c(".vfs").onclick = () => isFull() ? exitFull() : enterFull();
   $c(".vexit").onclick = exitFull;
+  ["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => setTimeout(() => fitYT(card), 60)));
+  // auto-hide controls in fullscreen while playing
+  let idle = null; const wake = () => { card.classList.remove("idle"); clearTimeout(idle); idle = setTimeout(() => { if (isFull() && p.getPlayerState() === 1) card.classList.add("idle"); }, 2800); };
+  ["pointermove", "pointerdown", "keydown"].forEach(ev => card.addEventListener(ev, wake)); wake();
   // double-tap left / right = -10 s / +10 s (keep tapping to add more); single tap = play / pause
-  card.querySelectorAll(".vzone").forEach(z => {
+  $c(".vzone.c").addEventListener("pointerup", e => { e.preventDefault(); p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo(); });
+  card.querySelectorAll(".vzone.l, .vzone.r").forEach(z => {
     const dir = z.classList.contains("r") ? 1 : -1, rip = z.querySelector(".vrip"), lab = rip.querySelector("b");
     let last = 0, streak = 0, single = null, hide = null;
     z.addEventListener("pointerup", e => {
