@@ -7,6 +7,13 @@ const PDF = "AM701_50_Predicted_Questions_with_Answers.pdf";
 const WNAMES = { neuron: "Neuron playground — the party decision", activation: "Activation function explorer", perceptron: "Perceptron trainer", backprop: "Backpropagation, step by step",
   conv: "Convolution + pooling animator", convcalc: "Output size & parameter calculator", bayes: "Bayes: 1,000-person disease test", hinge: "Hinge loss explorer",
   optim: "Optimizer race: SGD vs Momentum vs RMSProp vs Adam", lstm: "LSTM gate explorer", gan: "GAN: distributions converging" };
+const ICON = {
+  home: '<svg viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6h-6v6H4a1 1 0 0 1-1-1z"/></svg>',
+  learn: '<svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>',
+  quiz: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.2v.1"/></svg>',
+  revise: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/></svg>',
+  me: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>'
+};
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const P = () => (window.DB && DB.profile()) || { done: {}, best: 0, attempts: 0 };
 
@@ -26,6 +33,9 @@ function header() {
   $("#nav").innerHTML = links.map(([href, t]) => `<a href="${href}" class="${h.split("?")[0] === href ? "active" : ""}">${t}</a>`).join("");
   $("#user").innerHTML = u ? `<a class="pdf-link" href="${PDF}" download>Free PDF ↓</a><img src="${esc(u.photoURL || "")}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none'"><span>${esc((u.displayName || "Student").split(" ")[0])}</span><button id="logout" class="link">Sign out</button>` : "";
   const lo = $("#logout"); if (lo) lo.onclick = () => DB.signOut();
+  const p = h.split("?")[0]; const isMod = /^#\/(m\d|learn)/.test(p);
+  const tabs = [["#/", "Home", "home", p === "#/" || p === "#"], ["#/learn", "Learn", "learn", isMod], ["#/quiz", "Quiz", "quiz", p === "#/quiz"], ["#/revision", "Revise", "revise", p === "#/revision" || p === "#/predicted"], ["#/progress", "Me", "me", p === "#/progress"]];
+  $("#tabbar").innerHTML = tabs.map(([href, t, ic, on]) => `<a href="${href}" class="${on ? "on" : ""}" aria-label="${t}">${ICON[ic]}<span>${t}</span></a>`).join("");
 }
 function progressBlock() {
   const d = P().done || {}; const n = MODS.filter(m => d[m.id]).length;
@@ -57,6 +67,18 @@ function home() {
   </section>`;
 }
 
+
+/* ---------- Learn (module list, mobile-first) ---------- */
+function learn() {
+  const d = P().done || {};
+  app.innerHTML = `<section class="mhead"><span class="eyebrow">Your course</span><h1>Learn, one module at a time</h1><p class="lead">Watch → play → read → practise → review. About 6–10 hours in total.</p>${progressBlock()}</section>
+  <div class="mlist">${MODS.map(m => `<a class="mrow ${d[m.id] ? "done" : ""}" href="#/${m.id}"><span class="mnum">${d[m.id] ? "✓" : m.num}</span><div><b>${esc(m.title)}</b><small>${m.time} · ${m.videos.length} video${m.videos.length > 1 ? "s" : ""} · ${m.widgets.length} animations</small></div><span class="chev">›</span></a>`).join("")}</div>
+  <div class="mlist">
+    <a class="mrow" href="#/predicted"><span class="mnum alt">★</span><div><b>Predicted questions &amp; model paper</b><small>What is most likely to come</small></div><span class="chev">›</span></a>
+    <a class="mrow" href="${PDF}" download><span class="mnum alt">↓</span><div><b>Free PDF — 50 questions with answers</b><small>44 pages · print friendly</small></div><span class="chev">›</span></a>
+  </div>`;
+}
+
 /* ---------- Module ---------- */
 function moduleView(m) {
   const d = P().done || {};
@@ -66,7 +88,7 @@ function moduleView(m) {
   <nav class="toc"><a href="#watch">Watch</a><a href="#play">Animations</a><a href="#notes">Notes</a><a href="#short">5-mark</a><a href="#long">15-mark</a><a href="#num">Numericals</a><a href="#review">Review</a></nav>
   <section id="watch"><h2><span class="n">1</span> Watch first</h2><div class="vgrid">${m.videos.map(videoCard).join("")}</div></section>
   <section id="play"><h2><span class="n">2</span> Play with it</h2><div class="wgrid">${m.widgets.map(w => `<div class="widget" data-w="${w}"><h3>${WNAMES[w]}</h3></div>`).join("")}</div></section>
-  <section id="notes"><h2><span class="n">3</span> Exam notes</h2>${m.notes.map((n, i) => `<details class="note" ${i < 2 ? "open" : ""}><summary>${n.h}</summary><div class="nbody">${n.html}${fig(n.fig)}${fig(n.fig2)}</div></details>`).join("")}</section>
+  <section id="notes"><h2><span class="n">3</span> Exam notes</h2>${m.notes.map((n, i) => `<details class="note" ${i < (innerWidth < 760 ? 1 : 2) ? "open" : ""}><summary>${n.h}</summary><div class="nbody">${n.html}${fig(n.fig)}${fig(n.fig2)}</div></details>`).join("")}</section>
   <section id="short"><h2><span class="n">4</span> 5-mark questions</h2>${qa(m.short)}</section>
   <section id="long"><h2><span class="n">5</span> 15-mark questions</h2>${qa(m.long)}</section>
   <section id="num"><h2><span class="n">6</span> Solved numericals</h2>${qa(m.numericals)}</section>
@@ -83,6 +105,9 @@ function moduleView(m) {
   document.querySelectorAll(".widget").forEach(b => { const fn = window.WIDGETS[b.dataset.w]; if (fn) fn(b); });
   document.querySelectorAll(".toc a").forEach(a => a.onclick = ev => { ev.preventDefault(); document.getElementById(a.getAttribute("href").slice(1)).scrollIntoView({ behavior: "smooth" }); });
   wireQA(); reviewUI(m);
+  const links = [...document.querySelectorAll(".toc a")];
+  const io = new IntersectionObserver(es => es.forEach(en => { if (en.isIntersecting) { links.forEach(l => l.classList.toggle("on", l.getAttribute("href") === "#" + en.target.id)); const on = links.find(l => l.classList.contains("on")); const toc = document.querySelector(".toc"); if (on && toc) toc.scrollTo({ left: on.offsetLeft - toc.clientWidth / 2 + on.clientWidth / 2, behavior: "smooth" }); } }), { rootMargin: "-45% 0px -50% 0px" });
+  ["watch", "play", "notes", "short", "long", "num", "review"].forEach(id => { const s = document.getElementById(id); s && io.observe(s); });
   $("#donechk").onchange = async e => { try { await DB.setDone(m.id, e.target.checked); header(); if (e.target.checked) { toast(`Module ${m.num} marked complete 🎉 Please leave a quick review below.`); $("#review").scrollIntoView({ behavior: "smooth" }); } } catch (err) { toast("Could not save progress: " + err.message, true); } };
 }
 function qa(list) { return (list || []).map((x, i) => `<div class="qa"><div class="q"><span>Q${i + 1}</span>${x.q}</div><button class="show">Show answer</button><div class="a hidden">${x.a}${fig(x.fig)}</div></div>`).join(""); }
@@ -161,11 +186,13 @@ function revision() {
   app.innerHTML = `<section class="mhead"><span class="eyebrow">Last-day revision</span><h1>Flashcards &amp; formula sheet</h1></section>
   <section><div class="fc-wrap"><div class="fc" id="fc"><div class="front"></div><div class="back"></div></div>
   <div class="row center"><button class="btn" id="pv">←</button><button class="btn" id="ag">Again ↺</button><button class="btn primary" id="kn">Know it ✓</button><button class="btn" id="nx">→</button></div>
-  <div class="row center"><button class="btn ghost" id="sh">Shuffle</button><button class="btn ghost" id="oa">Only "again" cards</button></div><p class="center small" id="fcount"></p></div></section>
+  <div class="row center"><button class="btn ghost" id="sh">Shuffle</button><button class="btn ghost" id="oa">Only "again" cards</button></div><p class="center small" id="fcount"></p><p class="center small only-touch">Swipe left / right to move · tap to flip</p></div></section>
   <section><div class="sec-head"><h2>Formula sheet</h2><button class="btn ghost" onclick="window.print()">Print</button></div><div class="card"><table class="formulas">${(window.FORMULAS || []).map(([a, b]) => `<tr><td>${a}</td><td>${b}</td></tr>`).join("")}</table></div></section>`;
   const fc = $("#fc");
   const draw = () => { const c = F[order[k]]; fc.classList.remove("flip"); fc.querySelector(".front").innerHTML = `<small>tap to flip</small><div>${c[0]}</div>`; fc.querySelector(".back").innerHTML = `<div>${c[1]}</div>`; $("#fcount").textContent = `${k + 1} / ${order.length} · marked again: ${again.size}`; };
   fc.onclick = () => fc.classList.toggle("flip");
+  let sx = null; fc.addEventListener("touchstart", e => { sx = e.touches[0].clientX; }, { passive: true });
+  fc.addEventListener("touchend", e => { if (sx === null) return; const dx = e.changedTouches[0].clientX - sx; sx = null; if (Math.abs(dx) > 50) { e.preventDefault(); dx < 0 ? $("#nx").onclick() : $("#pv").onclick(); } });
   $("#nx").onclick = () => { k = (k + 1) % order.length; draw(); }; $("#pv").onclick = () => { k = (k - 1 + order.length) % order.length; draw(); };
   $("#ag").onclick = () => { again.add(order[k]); keep(); $("#nx").onclick(); }; $("#kn").onclick = () => { again.delete(order[k]); keep(); $("#nx").onclick(); };
   $("#sh").onclick = () => { order.sort(() => Math.random() - 0.5); k = 0; draw(); }; $("#oa").onclick = () => { if (again.size) { order = [...again]; k = 0; draw(); } };
@@ -177,7 +204,9 @@ async function progress() {
   const d = P().done || {};
   app.innerHTML = `<section class="mhead"><span class="eyebrow">Saved to your Google account</span><h1>My progress</h1>${progressBlock()}</section>
   <div class="grid">${MODS.map(m => `<div class="card"><div class="mtop"><span class="mnum">${m.num}</span>${d[m.id] ? '<span class="pill ok">Completed</span>' : '<span class="pill">Not yet</span>'}</div><h3>${esc(m.title)}</h3><div class="row"><a class="btn" href="#/${m.id}">Open</a><a class="btn ghost" href="#/quiz?m=${m.num}">Quiz</a></div></div>`).join("")}</div>
-  <section><h2>Recent quiz attempts</h2><div id="att" class="card small">Loading…</div></section>`;
+  <section><h2>Recent quiz attempts</h2><div id="att" class="card small">Loading…</div></section>
+  <div class="row center"><a class="btn" href="${PDF}" download>Download free PDF</a><button class="btn ghost" id="so2">Sign out</button></div>`;
+  $("#so2").onclick = () => DB.signOut();
   try { const a = await DB.myAttempts(); $("#att").innerHTML = a.length ? `<table><tr><th>When</th><th>Quiz</th><th>Score</th></tr>${a.map(x => `<tr><td>${x.at && x.at.toDate ? x.at.toDate().toLocaleString() : "just now"}</td><td>${x.module ? "Module " + x.module : "Full test"}</td><td><b>${x.score}/${x.total}</b> (${x.pct}%)</td></tr>`).join("")}</table>` : "No attempts yet — take a quiz!"; }
   catch (e) { $("#att").textContent = "Could not load attempts: " + e.message; }
 }
@@ -185,11 +214,13 @@ async function progress() {
 function toast(msg, bad) { const t = document.createElement("div"); t.className = "toast" + (bad ? " bad" : ""); t.textContent = msg; document.body.appendChild(t); setTimeout(() => t.remove(), 4200); }
 
 function route() {
-  header(); window.scrollTo(0, 0);
+  header(); window.scrollTo(0, 0); readProgress(); document.body.dataset.page = (location.hash.split("?")[0] || "#/").replace(/[#/]/g, "") || "home";
   const [path, qs] = (location.hash.slice(1) || "/").split("?"); const params = new URLSearchParams(qs || "");
   const m = MODS.find(x => "/" + x.id === path);
-  if (m) moduleView(m); else if (path === "/quiz") quiz(params); else if (path === "/predicted") predicted(); else if (path === "/revision") revision(); else if (path === "/progress") progress(); else home();
+  if (m) moduleView(m); else if (path === "/quiz") quiz(params); else if (path === "/predicted") predicted(); else if (path === "/revision") revision(); else if (path === "/progress") progress(); else if (path === "/learn") learn(); else home();
 }
+function readProgress() { const b = document.querySelector("#readbar div"); if (!b) return; const h = document.documentElement; const max = h.scrollHeight - h.clientHeight; b.style.width = (max > 0 ? Math.min(100, h.scrollTop / max * 100) : 0) + "%"; }
+window.addEventListener("scroll", readProgress, { passive: true });
 let started = false;
 window.startApp = () => { if (!started) { started = true; window.addEventListener("hashchange", route); } route(); };
 })();

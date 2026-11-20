@@ -4,6 +4,7 @@ const C = { bg: "#1f2a26", panel: "#26332e", dim: "#4b5c55", grey: "#a7b5ae", wh
 const W = window.WIDGETS = {};
 function el(tag, attrs = {}, html = "") { const e = document.createElement(tag); for (const k in attrs) e.setAttribute(k, attrs[k]); if (html) e.innerHTML = html; return e; }
 function canvas(parent, w, h) {
+  const wrap = el("div", { class: "cv-scroll" }); parent.appendChild(wrap); parent = wrap;
   const cv = el("canvas"); cv.style.width = "100%"; cv.style.maxWidth = w + "px"; cv.style.aspectRatio = w + "/" + h;
   const dpr = Math.min(2, window.devicePixelRatio || 1); cv.width = w * dpr; cv.height = h * dpr;
   const ctx = cv.getContext("2d"); ctx.scale(dpr, dpr); parent.appendChild(cv); return { cv, ctx, w, h };

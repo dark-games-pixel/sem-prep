@@ -146,3 +146,77 @@ footer{border-top:1px solid var(--line);color:var(--mut);font-size:13px;text-ali
 @media (max-width:640px){.plan li{grid-template-columns:1fr;gap:2px}.toc{top:100px}.w-slider input{width:110px}.gate-card{padding:24px}}
 @media print{.top,.toc,footer,.btn,.fc-wrap,.chips,.gate{display:none!important}body{background:#fff}}
 [hidden]{display:none!important}
+
+/* ================= Mobile-first, calm layout ================= */
+.readbar{position:fixed;top:0;left:0;right:0;height:3px;z-index:60;pointer-events:none}.readbar div{height:100%;width:0;background:linear-gradient(90deg,var(--primary),#38b2a6);transition:width .15s linear}
+.tabbar{display:none}.only-touch{display:none}
+.cv-scroll{width:100%}.wgrid{grid-template-columns:minmax(0,1fr)}.widget{min-width:0;overflow:hidden}html,body{overflow-x:clip}
+.mlist{display:flex;flex-direction:column;gap:10px;margin:0 0 22px}
+.mrow{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:14px 16px;color:var(--ink);box-shadow:var(--shadow)}
+.mrow:hover{text-decoration:none;border-color:var(--primary)}.mrow div{flex:1;min-width:0}.mrow b{display:block;font:700 15.5px/1.35 "Plus Jakarta Sans",Inter,system-ui,sans-serif}.mrow small{font-size:13px}
+.mrow.done .mnum{background:var(--green-soft);color:var(--green)}.mnum.alt{background:var(--accent-soft);color:#9a4f00}.chev{font-size:24px;color:#b5ae9f;line-height:1}
+.toc a.on{background:var(--ink);color:#fff;border-color:var(--ink)}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;scroll-behavior:auto!important}}
+
+@media (max-width:760px){
+  body{font-size:16.5px;line-height:1.72;padding-bottom:calc(74px + env(safe-area-inset-bottom))}
+  /* top bar: calm and minimal */
+  .top{padding:10px 16px;padding-top:calc(10px + env(safe-area-inset-top));gap:10px;flex-wrap:nowrap;box-shadow:none}
+  #nav{display:none}
+  .brand{font-size:15px}.user{margin-left:auto;gap:6px}.user span,.user .link{display:none}.user img{width:32px;height:32px}
+  .user .pdf-link{padding:6px 10px;font-size:13px}
+  /* bottom tab bar */
+  .tabbar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:50;background:rgba(255,255,255,.94);backdrop-filter:blur(14px);border-top:1px solid var(--line);padding:6px 6px calc(6px + env(safe-area-inset-bottom))}
+  .tabbar a{flex:1;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;border-radius:14px;color:#8a8f95;font:600 11.5px Inter;text-decoration:none!important}
+  .tabbar svg{width:24px;height:24px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+  .tabbar a.on{color:var(--primary-2)}.tabbar a.on svg{stroke-width:2.2}.tabbar a.on span{font-weight:700}
+  .tabbar a:active{background:var(--soft)}
+  main{padding:18px 16px 28px}
+  section{margin-bottom:32px}
+  h1{font-size:28px;line-height:1.2}h2{font-size:21px}h3{font-size:16.5px}
+  .lead{font-size:16px}.eyebrow{font-size:11px}
+  .btn{min-height:46px;padding:11px 16px;border-radius:14px}
+  .cta{flex-direction:column;align-items:stretch}.cta .btn{justify-content:center}
+  .hero{padding-top:4px;gap:0}.hero h1{font-size:27px}
+  .grid,.grid.three,.vgrid{grid-template-columns:1fr;gap:12px}
+  .card,.mcard{padding:16px;border-radius:16px;box-shadow:none}
+  .mcard p{display:none}
+  .split{gap:8px}.plan li{padding:12px 14px}
+  .pdf-card{flex-direction:column;align-items:stretch;text-align:left}.pdf-card .btn{justify-content:center}
+  /* module page */
+  .toc{top:calc(56px + env(safe-area-inset-top));flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -16px 10px;padding:8px 16px 12px;scroll-snap-type:x proximity}
+  .toc::-webkit-scrollbar{display:none}.toc a{flex:none;scroll-snap-align:center;padding:8px 14px;font-size:13.5px}
+  h2 .n{width:26px;height:26px;font-size:13px;border-radius:8px}
+  .widget{padding:14px;border-radius:16px;margin:0 -4px}
+  .cv-scroll{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:6px -14px;padding:0 14px;scrollbar-width:thin}
+  .cv-scroll canvas{min-width:560px;margin:4px 0}
+  .widget:has(canvas) h3::after{content:"  ↔ swipe the animation";font:500 11.5px Inter;color:var(--mut)}
+  .w-controls{flex-direction:column;align-items:stretch;gap:12px}
+  .w-slider{display:grid;grid-template-columns:96px 1fr 56px;gap:10px}.w-slider input{width:100%;height:28px}
+  .w-toggles{display:grid;grid-template-columns:1fr;gap:8px}.w-btn{min-height:44px;font-size:14.5px}
+  .w-select{min-height:44px}.w-controls.grid{grid-template-columns:1fr 1fr}
+  .note{border-radius:14px}.note summary{padding:14px 16px;font-size:15.5px}.nbody{padding:12px 16px 16px;font-size:15.5px}
+  .formula{font-size:14.5px;padding:10px 12px;text-align:left}
+  table{font-size:13.5px}th,td{padding:7px 8px}
+  figure img{max-height:300px;padding:4px}
+  .qa{padding:14px 16px;border-radius:14px}.show{min-height:40px;width:100%}
+  .review-sec{padding:16px;border-radius:18px}.finish{flex-direction:column;align-items:stretch}.finish .btn{justify-content:center}
+  .rate button{font-size:40px;padding:0 4px}
+  .pager{margin-top:18px;gap:10px}
+  .pager .btn{flex:1;justify-content:center}.pager span{display:none}
+  /* quiz */
+  .quiz{padding:16px;border-radius:18px;box-shadow:none}.quiz h3{font-size:17px;line-height:1.45}
+  .opt{min-height:54px;padding:12px 14px;font-size:15.5px;border-radius:14px}
+  #nx{position:sticky;bottom:calc(78px + env(safe-area-inset-bottom));width:100%;justify-content:center;box-shadow:0 8px 20px -8px rgba(15,118,110,.6)}
+  .chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:10px -16px;padding:0 16px}.chips::-webkit-scrollbar{display:none}.chips a,.chips button{flex:none}
+  .result .score{font-size:52px}
+  /* flashcards */
+  .fc{height:300px}.fc>div{font-size:20px;padding:22px}.only-touch{display:block}
+  .fc-wrap .row{flex-wrap:nowrap;gap:8px}.fc-wrap .row .btn{flex:1;justify-content:center;padding:10px 8px;font-size:14px;white-space:nowrap}
+  .toast{bottom:calc(86px + env(safe-area-inset-bottom))}
+  footer{padding:18px 16px 8px}
+  .gate{align-items:end;padding:0}.gate-card{border-radius:26px 26px 0 0;padding:28px 22px calc(26px + env(safe-area-inset-bottom));max-width:none}
+  .gate-card h1{font-size:26px}
+}
+@media (max-width:380px){h1{font-size:25px}.tabbar a{font-size:10.5px}.w-slider{grid-template-columns:80px 1fr 50px}}
+section[id]{scroll-margin-top:120px}
