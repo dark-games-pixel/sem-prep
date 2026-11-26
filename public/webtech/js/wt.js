@@ -64,6 +64,22 @@ function learn() {
 /* ---------- video player ---------- */
 let ytReady = null; const players = {};
 function loadYT() { if (ytReady) return ytReady; ytReady = new Promise(res => { if (window.YT && YT.Player) return res(); const prev = window.onYouTubeIframeAPIReady; window.onYouTubeIframeAPIReady = () => { prev && prev(); res(); }; const s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(s); }); return ytReady; }
+const SVG = {
+  play: '<svg viewBox="0 0 24 24"><path d="M7 4.5v15l13-7.5z"/></svg>', pause: '<svg viewBox="0 0 24 24"><path d="M6 4.5h4v15H6zM14 4.5h4v15h-4z"/></svg>',
+  back: '<svg viewBox="0 0 24 24"><path d="M12 5V2L7 6l5 4V7a6 6 0 1 1-6 6H4a8 8 0 1 0 8-8z"/><text x="8.2" y="16.2" font-size="6.4" font-weight="800" fill="#000" stroke="none">10</text></svg>',
+  fwd: '<svg viewBox="0 0 24 24"><path d="M12 5V2l5 4-5 4V7a6 6 0 1 0 6 6h2a8 8 0 1 1-8-8z"/><text x="8.2" y="16.2" font-size="6.4" font-weight="800" fill="#000" stroke="none">10</text></svg>',
+  vol: '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 8.5a5 5 0 0 1 0 7M18.5 6a8.5 8.5 0 0 1 0 12" fill="none" stroke-width="1.8"/></svg>', mute: '<svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9z"/><path d="M16 9l5 6M21 9l-5 6" fill="none" stroke-width="1.8"/></svg>',
+  fs: '<svg viewBox="0 0 24 24"><path d="M4 9V4h5M20 9V4h-5M4 15v5h5M20 15v5h-5" fill="none" stroke-width="2.2"/></svg>', fsx: '<svg viewBox="0 0 24 24"><path d="M9 4v5H4M15 4v5h5M9 20v-5H4M15 20v-5h5" fill="none" stroke-width="2.2"/></svg>'
+};
+const SPEEDS = [0.5, 0.75, 1, 1.25, 1.5, 1.75, 2], QLAB = { hd2160: "2160p", hd1440: "1440p", hd1080: "1080p", hd720: "720p", large: "480p", medium: "360p", small: "240p", tiny: "144p", auto: "Auto" };
+function vcard(id) {
+  const v = VID()[id]; if (!v) return ""; const yid = ytId(v.yt), w = (S.get().watched || {})[id];
+  const ov = `<div class="vov" hidden><input class="vbar" type="range" min="0" max="1000" value="0" aria-label="Seek"><div class="vrow"><button class="vi vplay" aria-label="Play or pause">${SVG.play}</button><button class="vi vback" aria-label="Back 10 seconds">${SVG.back}</button><button class="vi vfwd" aria-label="Forward 10 seconds">${SVG.fwd}</button><button class="vi vmute" aria-label="Mute">${SVG.vol}</button><span class="vtime">0:00 / ${v.dur}</span><span class="vsp"></span>
+    <span class="vmenu"><button class="vt vspd" aria-label="Playback speed">1x</button><div class="vpop vspop" hidden>${SPEEDS.map(r => `<button data-r="${r}" class="${r === 1 ? "on" : ""}">${r === 1 ? "Normal" : r + "x"}</button>`).join("")}</div></span>
+    <span class="vmenu"><button class="vt vqual" aria-label="Video quality">Auto</button><div class="vpop vqpop" hidden></div></span><button class="vi vfs" aria-label="Fullscreen">${SVG.fs}</button></div></div>`;
+  return `<article class="vcard ${w ? "watched" : ""}" data-id="${id}"><div class="yt">${yid ? `<div id="wtyt-${id}"></div>` : ""}<img class="poster" src="webtech/poster/${id}.jpg" alt="" loading="lazy"><button class="cover ${yid ? "" : "soon"}" ${yid ? `aria-label="Play ${esc(v.title)}"` : "disabled"}>${yid ? `<span class="play">${ICO.play}</span>` : ""}</button>${yid ? "" : '<span class="soon-t">Video coming soon</span>'}<span class="dur">${v.dur}</span>${yid ? ov : ""}</div>
+  <div class="vmeta"><b>${esc(v.title)}</b><span>${v.dur} · Hinglish voice · animated${w ? ' · <em class="em">watched</em>' : ""}</span><ul class="chap">${(v.chapters || []).map(c => `<li><button data-t="${c.t}"><i>${fmt(c.t)}</i>${esc(c.h)}</button></li>`).join("")}</ul></div></article>`;
+}
 function fitYT(card) {   // crop YouTube's title, channel and logo bars: the iframe is taller than the box and the box clips it
   const box = card.querySelector(".wt-yt"), f = box && box.querySelector("iframe"); if (!f) return;
   const W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
@@ -71,13 +87,7 @@ function fitYT(card) {   // crop YouTube's title, channel and logo bars: the ifr
   Object.assign(f.style, { position: "absolute", right: "auto", bottom: "auto", width: vw + "px", height: (vh + 2 * pad) + "px", left: ((W - vw) / 2) + "px", top: ((H - vh) / 2 - pad) + "px", pointerEvents: "none", border: "0" });
 }
 window.addEventListener("resize", () => document.querySelectorAll(".wt-vcard").forEach(fitYT));
-["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => setTimeout(() => document.querySelectorAll(".wt-vcard").forEach(fitYT), 80)));
-function vcard(id) {
-  const v = VID()[id]; if (!v) return ""; const yid = ytId(v.yt), w = (S.get().watched || {})[id];
-  return `<article class="vcard ${w ? "watched" : ""}" data-id="${id}"><div class="yt">${yid ? `<div id="wtyt-${id}"></div>` : ""}<img class="poster" src="webtech/poster/${id}.jpg" alt="" loading="lazy"><button class="cover ${yid ? "" : "soon"}" ${yid ? `aria-label="Play ${esc(v.title)}"` : "disabled"}>${yid ? `<span class="play">${ICO.play}</span>` : ""}</button>${yid ? "" : '<span class="soon-t">Video coming soon</span>'}<span class="dur">${v.dur}</span></div>
-  <div class="vctl" hidden><div class="vseek"><span class="vcur">0:00</span><input class="vbar" type="range" min="0" max="1000" value="0" aria-label="Seek"><span>${v.dur}</span></div><div class="vbtns"><button class="vb vplay">Play</button><button class="vb vback">-10s</button><button class="vb vfwd">+10s</button>${[0.75, 1, 1.25, 1.5, 2].map(r => `<button class="vb vs ${r === 1 ? "on" : ""}" data-r="${r}">${r}x</button>`).join("")}<button class="vb vmute">Mute</button><button class="vb vfs">Fullscreen</button></div></div>
-  <div class="vmeta"><b>${esc(v.title)}</b><span>${v.dur} · Hinglish voice · animated${w ? ' · <em class="em">watched</em>' : ""}</span><ul class="chap">${(v.chapters || []).map(c => `<li><button data-t="${c.t}"><i>${fmt(c.t)}</i>${esc(c.h)}</button></li>`).join("")}</ul></div></article>`;
-}
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => { setTimeout(() => document.querySelectorAll(".wt-vcard").forEach(c => { fitYT(c); const b = c.querySelector(".wt-vfs"); if (b) b.innerHTML = (document.fullscreenElement || document.webkitFullscreenElement) === c.querySelector(".wt-yt") ? SVG.fsx : SVG.fs; }), 80); }));
 function initVideos(root) {
   root.querySelectorAll(".wt-vcard").forEach(card => {
     const id = card.dataset.id, v = VID()[id], yid = ytId(v.yt); const cover = card.querySelector(".wt-cover"), q = s => card.querySelector(s);
@@ -86,25 +96,38 @@ function initVideos(root) {
     cover.onclick = () => {
       cover.innerHTML = '<span class="play">...</span>';
       loadYT().then(() => {
-        const resume = (S.get().pos || {})[id] || 0;
+        const st = S.get(), resume = (st.pos || {})[id] || 0;
         new YT.Player("wtyt-" + id, { videoId: yid, host: "https://www.youtube-nocookie.com", playerVars: { rel: 0, modestbranding: 1, playsinline: 1, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, start: resume > 5 ? Math.floor(resume) : 0, autoplay: 1 },
-          events: { onReady: e => { const p = players[id] = e.target, fr = q("iframe"); card.querySelector(".wt-yt").style.cssText += ";"; q(".wt-poster").remove(); cover.remove(); q(".wt-vctl").hidden = false; fitYT(card); wire(card, id, p); p.playVideo(); if (resume > 5) toast("Resumed from " + fmt(resume)); },
-            onStateChange: e => { const b = q(".wt-vplay"); if (b) b.textContent = e.data === 1 ? "Pause" : "Play"; if (e.data === 0) { S.set(s => { (s.watched = s.watched || {})[id] = true; (s.pos = s.pos || {})[id] = 0; }); card.classList.add("watched"); toast("Video complete. Next one?"); } } } });
+          events: { onReady: e => { const p = players[id] = e.target; q(".wt-poster").remove(); cover.remove(); const du = q(".wt-dur"); du && du.remove(); q(".wt-vov").hidden = false; fitYT(card); wire(card, id, p); p.playVideo(); if (st.rate && st.rate !== 1) setTimeout(() => p.setPlaybackRate(st.rate), 600); if (resume > 5) toast("Resumed from " + fmt(resume)); },
+            onStateChange: e => { const b = q(".wt-vplay"); if (b) b.innerHTML = e.data === 1 ? SVG.pause : SVG.play; card.classList.toggle("wt-paused", e.data !== 1); if (e.data === 1) fillQuality(card, players[id]); if (e.data === 0) { S.set(s => { (s.watched = s.watched || {})[id] = true; (s.pos = s.pos || {})[id] = 0; }); card.classList.add("watched"); toast("Video complete. Next one?"); } } } });
       });
     };
   });
 }
+function fillQuality(card, p) {
+  const pop = card.querySelector(".wt-vqpop"); if (!pop || !p.getAvailableQualityLevels) return; let lv = []; try { lv = p.getAvailableQualityLevels() || []; } catch (e) {}
+  lv = lv.filter(x => QLAB[x] && x !== "auto"); const key = lv.join(","); if (pop.dataset.k === key) return; pop.dataset.k = key;
+  pop.innerHTML = ["auto", ...lv].map(x => `<button data-q="${x}" class="${x === "auto" ? "wt-on" : ""}">${QLAB[x]}</button>`).join("");
+  pop.querySelectorAll("button").forEach(b => b.onclick = () => { try { p.setPlaybackQuality(b.dataset.q); } catch (e) {} pop.querySelectorAll("button").forEach(x => x.classList.toggle("wt-on", x === b)); card.querySelector(".wt-vqual").textContent = QLAB[b.dataset.q]; pop.hidden = true; toast("Quality set to " + QLAB[b.dataset.q] + (b.dataset.q === "auto" ? "" : " (YouTube may take a few seconds to switch)")); });
+}
 function wire(card, id, p) {
-  const q = s => card.querySelector(s), bar = q(".wt-vbar"); let drag = false;
-  q(".wt-vplay").onclick = () => p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo();
-  q(".wt-vback").onclick = () => p.seekTo(Math.max(0, p.getCurrentTime() - 10), true); q(".wt-vfwd").onclick = () => p.seekTo(p.getCurrentTime() + 10, true);
-  card.querySelectorAll(".wt-vs").forEach(b => b.onclick = () => { p.setPlaybackRate(+b.dataset.r); card.querySelectorAll(".wt-vs").forEach(x => x.classList.toggle("wt-on", x === b)); });
-  q(".wt-vmute").onclick = e => { if (p.isMuted()) { p.unMute(); e.target.textContent = "Mute"; } else { p.mute(); e.target.textContent = "Unmute"; } };
-  q(".wt-vfs").onclick = () => { if (document.fullscreenElement || document.webkitFullscreenElement) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } else { (card.requestFullscreen || card.webkitRequestFullscreen).call(card); } };
-  bar.oninput = () => { drag = true; q(".wt-vcur").textContent = fmt(bar.value / 1000 * p.getDuration()); }; bar.onchange = () => { p.seekTo(bar.value / 1000 * p.getDuration(), true); drag = false; };
-  const yt = q(".wt-yt"), z = document.createElement("div"); z.style.cssText = "position:absolute;inset:0;z-index:3;cursor:pointer"; yt.appendChild(z); z.onclick = () => p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo();
-  z.ondblclick = e => { const r = z.getBoundingClientRect(), side = (e.clientX - r.left) / r.width; p.seekTo(Math.max(0, p.getCurrentTime() + (side > 0.5 ? 10 : -10)), true); };
-  let n = 0; const iv = setInterval(() => { if (!document.body.contains(card)) { clearInterval(iv); delete players[id]; return; } const d = p.getDuration(); if (!d) return; if (!drag) { bar.value = p.getCurrentTime() / d * 1000; q(".wt-vcur").textContent = fmt(p.getCurrentTime()); } if (++n % 10 === 0) S.set(s => (s.pos = s.pos || {})[id] = p.getCurrentTime()); }, 500);
+  const q = s => card.querySelector(s), bar = q(".wt-vbar"), box = q(".wt-yt"); let drag = false, idle = null;
+  const toggle = () => p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo(), seekBy = d => p.seekTo(Math.max(0, p.getCurrentTime() + d), true);
+  q(".wt-vplay").onclick = toggle; q(".wt-vback").onclick = () => seekBy(-10); q(".wt-vfwd").onclick = () => seekBy(10);
+  q(".wt-vmute").onclick = e => { const b = e.currentTarget; if (p.isMuted()) { p.unMute(); b.innerHTML = SVG.vol; } else { p.mute(); b.innerHTML = SVG.mute; } };
+  const menus = [q(".wt-vspop"), q(".wt-vqpop")]; const closeAll = () => menus.forEach(m => m.hidden = true);
+  q(".wt-vspd").onclick = e => { e.stopPropagation(); const h = q(".wt-vspop").hidden; closeAll(); q(".wt-vspop").hidden = !h; };
+  q(".wt-vqual").onclick = e => { e.stopPropagation(); fillQuality(card, p); const h = q(".wt-vqpop").hidden; closeAll(); q(".wt-vqpop").hidden = !h; };
+  q(".wt-vspop").querySelectorAll("button").forEach(b => b.onclick = () => { const r = +b.dataset.r; p.setPlaybackRate(r); S.set(s => s.rate = r); q(".wt-vspd").textContent = r + "x"; q(".wt-vspop").querySelectorAll("button").forEach(x => x.classList.toggle("wt-on", x === b)); closeAll(); });
+  const rate = S.get().rate; if (rate && rate !== 1) { q(".wt-vspd").textContent = rate + "x"; q(".wt-vspop").querySelectorAll("button").forEach(x => x.classList.toggle("wt-on", +x.dataset.r === rate)); }
+  q(".wt-vfs").onclick = () => { const fs = document.fullscreenElement || document.webkitFullscreenElement; if (fs) (document.exitFullscreen || document.webkitExitFullscreen).call(document); else (box.requestFullscreen || box.webkitRequestFullscreen).call(box); };
+  bar.oninput = () => { drag = true; q(".wt-vtime").textContent = fmt(bar.value / 1000 * p.getDuration()) + " / " + fmt(p.getDuration()); }; bar.onchange = () => { p.seekTo(bar.value / 1000 * p.getDuration(), true); drag = false; };
+  const z = document.createElement("div"); z.className = "wt-vzone"; box.appendChild(z); z.onclick = () => { closeAll(); toggle(); };
+  z.ondblclick = e => { const r = z.getBoundingClientRect(), side = (e.clientX - r.left) / r.width; if (side > 0.65) seekBy(10); else if (side < 0.35) seekBy(-10); else q(".wt-vfs").click(); };
+  const wake = () => { box.classList.remove("wt-idle"); clearTimeout(idle); idle = setTimeout(() => { if (p.getPlayerState() === 1) box.classList.add("wt-idle"); closeAll(); }, 2600); };
+  ["mousemove", "touchstart", "keydown", "click"].forEach(ev => box.addEventListener(ev, wake)); wake();
+  card.tabIndex = 0; card.addEventListener("keydown", e => { if (/INPUT|TEXTAREA/.test(e.target.tagName) && e.target.type !== "range") return; const k = e.key.toLowerCase(); if (k === "k" || k === " ") { e.preventDefault(); toggle(); } else if (k === "j") seekBy(-10); else if (k === "l") seekBy(10); else if (k === "f") q(".wt-vfs").click(); else if (k === "m") q(".wt-vmute").click(); });
+  const iv = setInterval(() => { if (!document.body.contains(card)) { clearInterval(iv); delete players[id]; return; } const d = p.getDuration(); if (!d) return; if (!drag) { bar.value = p.getCurrentTime() / d * 1000; q(".wt-vtime").textContent = fmt(p.getCurrentTime()) + " / " + fmt(d); } bar.style.setProperty("--p", (bar.value / 10) + "%"); if (Math.round(p.getCurrentTime()) % 5 === 0) S.set(s => (s.pos = s.pos || {})[id] = p.getCurrentTime()); }, 500);
 }
 function videos() {
   const mods = MODS(), st = stats(); S.set(s => s.last = "wt");
