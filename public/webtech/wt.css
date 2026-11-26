@@ -210,3 +210,11 @@ details.wt-note{background:var(--card);border:1px solid var(--line);border-radiu
 .wt .wt-bar{height:8px;background:var(--bg2);border-radius:99px;overflow:hidden;margin-top:12px}.wt .wt-bar div{height:100%;background:linear-gradient(90deg,var(--blue),var(--teal));border-radius:99px}
 .wt .wt-qz h2{font-size:22px}
 @media(max-width:860px){.wt .wt-subgrid,.wt .wt-wgrid{grid-template-columns:1fr}.wt .wt-sc-foot{flex-wrap:wrap}}
+
+.wt .wt-vcard:fullscreen{display:flex;flex-direction:column;background:#000;border:0;border-radius:0}
+.wt .wt-vcard:fullscreen .wt-yt{flex:1;aspect-ratio:auto}
+.wt .wt-vcard:fullscreen .wt-vctl{background:#0b1220;border-color:#1c2e4e}
+.wt .wt-vcard:fullscreen .wt-vmeta{display:none}
+.wt .wt-vcard:-webkit-full-screen{display:flex;flex-direction:column;background:#000}
+.wt .wt-vcard:-webkit-full-screen .wt-yt{flex:1;aspect-ratio:auto}
+.wt .wt-vcard:-webkit-full-screen .wt-vmeta{display:none}

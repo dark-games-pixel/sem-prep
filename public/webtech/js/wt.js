@@ -64,6 +64,14 @@ function learn() {
 /* ---------- video player ---------- */
 let ytReady = null; const players = {};
 function loadYT() { if (ytReady) return ytReady; ytReady = new Promise(res => { if (window.YT && YT.Player) return res(); const prev = window.onYouTubeIframeAPIReady; window.onYouTubeIframeAPIReady = () => { prev && prev(); res(); }; const s = document.createElement("script"); s.src = "https://www.youtube.com/iframe_api"; document.head.appendChild(s); }); return ytReady; }
+function fitYT(card) {   // crop YouTube's title, channel and logo bars: the iframe is taller than the box and the box clips it
+  const box = card.querySelector(".wt-yt"), f = box && box.querySelector("iframe"); if (!f) return;
+  const W = box.clientWidth, H = box.clientHeight; if (!W || !H) return;
+  const vw = Math.min(W, H * 16 / 9), vh = vw * 9 / 16, pad = Math.max(90, Math.round(vh * 0.22));
+  Object.assign(f.style, { position: "absolute", right: "auto", bottom: "auto", width: vw + "px", height: (vh + 2 * pad) + "px", left: ((W - vw) / 2) + "px", top: ((H - vh) / 2 - pad) + "px", pointerEvents: "none", border: "0" });
+}
+window.addEventListener("resize", () => document.querySelectorAll(".wt-vcard").forEach(fitYT));
+["fullscreenchange", "webkitfullscreenchange"].forEach(ev => document.addEventListener(ev, () => setTimeout(() => document.querySelectorAll(".wt-vcard").forEach(fitYT), 80)));
 function vcard(id) {
   const v = VID()[id]; if (!v) return ""; const yid = ytId(v.yt), w = (S.get().watched || {})[id];
   return `<article class="vcard ${w ? "watched" : ""}" data-id="${id}"><div class="yt">${yid ? `<div id="wtyt-${id}"></div>` : ""}<img class="poster" src="webtech/poster/${id}.jpg" alt="" loading="lazy"><button class="cover ${yid ? "" : "soon"}" ${yid ? `aria-label="Play ${esc(v.title)}"` : "disabled"}>${yid ? `<span class="play">${ICO.play}</span>` : ""}</button>${yid ? "" : '<span class="soon-t">Video coming soon</span>'}<span class="dur">${v.dur}</span></div>
@@ -80,7 +88,7 @@ function initVideos(root) {
       loadYT().then(() => {
         const resume = (S.get().pos || {})[id] || 0;
         new YT.Player("wtyt-" + id, { videoId: yid, host: "https://www.youtube-nocookie.com", playerVars: { rel: 0, modestbranding: 1, playsinline: 1, controls: 0, disablekb: 1, fs: 0, iv_load_policy: 3, start: resume > 5 ? Math.floor(resume) : 0, autoplay: 1 },
-          events: { onReady: e => { const p = players[id] = e.target, fr = q("iframe"); card.querySelector(".wt-yt").style.cssText += ";"; q(".wt-poster").remove(); cover.remove(); Object.assign(fr.style, { position: "absolute", inset: "0", width: "100%", height: "100%", pointerEvents: "none" }); q(".wt-vctl").hidden = false; wire(card, id, p); p.playVideo(); if (resume > 5) toast("Resumed from " + fmt(resume)); },
+          events: { onReady: e => { const p = players[id] = e.target, fr = q("iframe"); card.querySelector(".wt-yt").style.cssText += ";"; q(".wt-poster").remove(); cover.remove(); q(".wt-vctl").hidden = false; fitYT(card); wire(card, id, p); p.playVideo(); if (resume > 5) toast("Resumed from " + fmt(resume)); },
             onStateChange: e => { const b = q(".wt-vplay"); if (b) b.textContent = e.data === 1 ? "Pause" : "Play"; if (e.data === 0) { S.set(s => { (s.watched = s.watched || {})[id] = true; (s.pos = s.pos || {})[id] = 0; }); card.classList.add("watched"); toast("Video complete. Next one?"); } } } });
       });
     };
@@ -92,7 +100,7 @@ function wire(card, id, p) {
   q(".wt-vback").onclick = () => p.seekTo(Math.max(0, p.getCurrentTime() - 10), true); q(".wt-vfwd").onclick = () => p.seekTo(p.getCurrentTime() + 10, true);
   card.querySelectorAll(".wt-vs").forEach(b => b.onclick = () => { p.setPlaybackRate(+b.dataset.r); card.querySelectorAll(".wt-vs").forEach(x => x.classList.toggle("wt-on", x === b)); });
   q(".wt-vmute").onclick = e => { if (p.isMuted()) { p.unMute(); e.target.textContent = "Mute"; } else { p.mute(); e.target.textContent = "Unmute"; } };
-  q(".wt-vfs").onclick = () => { const el = q(".wt-yt"); (document.fullscreenElement ? document.exitFullscreen() : (el.requestFullscreen || el.webkitRequestFullscreen).call(el)); };
+  q(".wt-vfs").onclick = () => { if (document.fullscreenElement || document.webkitFullscreenElement) { (document.exitFullscreen || document.webkitExitFullscreen).call(document); } else { (card.requestFullscreen || card.webkitRequestFullscreen).call(card); } };
   bar.oninput = () => { drag = true; q(".wt-vcur").textContent = fmt(bar.value / 1000 * p.getDuration()); }; bar.onchange = () => { p.seekTo(bar.value / 1000 * p.getDuration(), true); drag = false; };
   const yt = q(".wt-yt"), z = document.createElement("div"); z.style.cssText = "position:absolute;inset:0;z-index:3;cursor:pointer"; yt.appendChild(z); z.onclick = () => p.getPlayerState() === 1 ? p.pauseVideo() : p.playVideo();
   z.ondblclick = e => { const r = z.getBoundingClientRect(), side = (e.clientX - r.left) / r.width; p.seekTo(Math.max(0, p.getCurrentTime() + (side > 0.5 ? 10 : -10)), true); };
