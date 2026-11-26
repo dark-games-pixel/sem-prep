@@ -4,3 +4,8 @@ functions/node_modules/
 *.log
 .DS_Store
 .env
+webtech_videos/
+webtech_build/work/
+webtech_build/audio_cache/
+__pycache__/
+.claude/

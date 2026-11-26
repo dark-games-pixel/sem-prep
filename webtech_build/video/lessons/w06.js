@@ -1,0 +1,52 @@
+LESSONS.w06 = { id: "w06", title: "HTML Forms, Iframe, Colors, Layout aur Image Maps", tag: "MODULE 2 · HTML, CSS, DHTML, XML", part: "Part 2 of 4", scenes: [
+{ tpl: "title", tag: "MODULE 2 · PART 2", h: "Forms, Iframe, Colors, Layout, Image Maps", sub: "User se data lena aur page ka layout banana",
+  lines: ["पिछले video में structure, links, lists और tables देखे। अब forms बनाना सीखेंगे, यानी user से data लेना। साथ में iframe, colors, page layout और image maps भी।"] },
+
+{ tpl: "code", h: "Form: registration page", lang: "html", codeW: 640, ph: 470,
+  code: ["<form action=\"register.jsp\" method=\"post\">", "  Name: <input type=\"text\" name=\"uname\">", "  Password: <input type=\"password\" name=\"pwd\">", "  <input type=\"radio\" name=\"g\" value=\"M\"> Male", "  <input type=\"radio\" name=\"g\" value=\"F\"> Female", "  <input type=\"checkbox\" name=\"s\" value=\"java\"> Java", "  <select name=\"branch\">", "    <option>CSE</option> <option>IT</option>", "  </select>", "  <input type=\"submit\" value=\"Register\">", "</form>"],
+  segs: [[0, 0, 1], [1, 2, 2], [3, 4, 3], [5, 5, 4], [6, 8, 5], [9, 10, 6]],
+  out: { type: "browser", url: "register.html", l: 2, html: "<div style='line-height:2.1'>Name: <input value='Ravi' style='width:140px'><br>Password: <input type='password' value='abcde' style='width:120px'><br><input type='radio' checked> Male <input type='radio'> Female<br><input type='checkbox' checked> Java<br><select><option>CSE</option><option>IT</option></select><br><button>Register</button></div>" }, oh: 340,
+  lines: ["Form user से data लेता है और server को भेजता है। form tag में action बताता है कि data कहाँ जाएगा, और method बताता है GET या POST।",
+    "Text के लिए input type text, और password के लिए input type password, जिसमें characters छुप जाते हैं।",
+    "Radio button में एक group के सारे buttons का name same रखते हैं, तब उनमें से सिर्फ एक चुना जा सकता है।",
+    "Checkbox से एक से ज़्यादा चीज़ें चुनी जा सकती हैं।",
+    "Drop down list के लिए select और option tags।",
+    "और submit button form को भेज देता है। reset button सब साफ़ कर देता है।"] },
+
+{ tpl: "bullets", h: "Form ke zaroori niyam", bullet: "dot",
+  items: [{ t: "Server ko data **name** attribute se milta hai", sub: "id se nahi, isliye har input ko name do" }, { t: "**method=\"get\"**: data URL mein; **\"post\"**: body mein" }, { t: "**textarea** multi-line text; **hidden** input chhupa data" }, { t: "**label for=\"id\"** click par input focus karta hai" }],
+  lines: ["कुछ ज़रूरी नियम। Server को data name attribute से मिलता है, id से नहीं, इसलिए हर input को name देना मत भूलो।",
+    "GET method में data URL में जाता है, और POST में request body में।",
+    "बड़े text के लिए textarea, और छुपा हुआ data भेजने के लिए hidden input।",
+    "और label tag का for attribute input के id से जुड़ता है, जिससे label पर click करने से input select हो जाता है।"] },
+
+{ tpl: "code", h: "Iframe aur Colors", lang: "html", codeW: 640,
+  code: ["<iframe src=\"https://example.com\" width=\"400\" height=\"250\"></iframe>", "", "<p style=\"color: red\">naam se</p>", "<p style=\"color: #FF0000\">hex se</p>", "<p style=\"color: rgb(255,0,0)\">rgb se</p>", "<p style=\"color: hsl(0,100%,50%)\">hsl se</p>"],
+  segs: [[0, 0, 1], [2, 5, 2]],
+  out: { type: "browser", url: "colors.html", l: 2, html: "<p style='color:red;margin:4px'>naam se</p><p style='color:#FF0000;margin:4px'>hex se</p><p style='color:rgb(255,0,0);margin:4px'>rgb se</p><p style='color:hsl(0,100%,50%);margin:4px'>hsl se</p>" }, oh: 250,
+  notes: [{ t: "**Hex** #RRGGBB: har do digit = Red, Green, Blue (00 se FF)", l: 3 }],
+  lines: ["Iframe से किसी page के अंदर दूसरा page दिखा सकते हैं, जैसे video या map embed करना। src में उसका address और width height।",
+    "Colors चार तरीकों से लिखे जाते हैं: नाम से, hex से, rgb से और hsl से। चारों यहाँ लाल रंग हैं।",
+    "Hex में हर दो digits क्रम से red, green और blue की मात्रा बताते हैं, zero zero से F F तक।"] },
+
+{ tpl: "flow", h: "Block vs Inline aur Page layout", y: 200, h2: 150,
+  steps: [{ t: "<header>", sub: "Logo, title", c: "sky" }, { t: "<nav>", sub: "Menu", c: "teal" }, { t: "<section> / <article>", sub: "Main content", c: "amber" }, { t: "<footer>", sub: "Copyright", c: "green" }],
+  notes: [{ t: "**Block** (div, p, h1): puri line leta hai, nayi line se shuru   **Inline** (span, a, b): sirf apni jagah", l: 2 }, { t: "**div** = generic dabba, **span** = generic inline tukda. Layout div ya semantic tags se", l: 3 }],
+  lines: ["अब layout। HTML elements दो तरह के होते हैं। Block elements, जैसे div, p और h one, पूरी line लेते हैं और नई line से शुरू होते हैं।",
+    "Inline elements, जैसे span, a और b, सिर्फ अपनी जगह घेरते हैं।",
+    "Page को header, navigation menu, main content और footer में बाँटने के लिए div का या नए semantic tags, header, nav, section, article और footer का इस्तेमाल होता है।",
+    "Div एक generic dabba है और span एक generic inline टुकड़ा।"] },
+
+{ tpl: "code", h: "Image Map: ek image, kai links", lang: "html", codeW: 700, ph: 330,
+  code: ["<img src=\"campus.jpg\" usemap=\"#campusmap\">", "<map name=\"campusmap\">", "  <area shape=\"rect\" coords=\"0,0,100,100\" href=\"library.html\">", "  <area shape=\"circle\" coords=\"200,150,40\" href=\"canteen.html\">", "  <area shape=\"poly\" coords=\"10,10,60,10,35,60\" href=\"lab.html\">", "</map>"],
+  segs: [[0, 1, 1], [2, 2, 2], [3, 3, 3], [4, 5, 4]],
+  notes: [],
+  lines: ["Image map में एक ही image के अलग अलग हिस्सों को अलग links बनाया जाता है, जैसे नक्शे पर किसी state पर click करना।",
+    "Img tag के usemap attribute का naam, map tag के name से match होना चाहिए, hash के साथ।",
+    "Rect shape में coords हैं x one, y one, x two, y two, यानी ऊपर बायाँ और नीचे दायाँ कोना। Circle में x, y और radius।",
+    "Poly shape में हर कोने के points। हर area tag में shape, coords, href और alt attributes होते हैं।"] },
+
+{ tpl: "bullets", h: "Yaad rakho", bullet: "tick",
+  items: ["Form: **action**, **method**; input types text, password, radio, checkbox, select, submit", "Radio group = **same name**; server data **name** se leta hai", "Iframe = page ke andar page; colors: naam, **hex**, rgb, hsl", "Block (div, p) vs inline (span, a); semantic layout tags", "Image map: **rect, circle, poly** + usemap / map name"],
+  lines: ["आज की मुख्य बातें: form के सारे input types और name attribute की अहमियत।", "Iframe, colors के चार तरीके, block और inline elements, और image map के तीन shapes।", "अगले video में CSS, DHTML और DOM देखेंगे। धन्यवाद!"] }
+]};

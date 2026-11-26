@@ -12,7 +12,10 @@ const ICON = {
   learn: '<svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3H20v15H6.5A2.5 2.5 0 0 0 4 20.5zM4 20.5A2.5 2.5 0 0 0 6.5 23H20v-5"/></svg>',
   quiz: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M9.5 9.5a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .9-1 1.6V14M12 17.2v.1"/></svg>',
   revise: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="14" height="14" rx="2"/><path d="M7 3h12a2 2 0 0 1 2 2v12"/></svg>',
-  me: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>'
+  me: '<svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>',
+  play: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M10 8.5v7l6-3.5z"/></svg>',
+  exam: '<svg viewBox="0 0 24 24"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5M9 13h7M9 17h5"/></svg>',
+  subj: '<svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>'
 };
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
 const P = () => (window.DB && DB.profile()) || { done: {}, best: 0, attempts: 0 };
@@ -147,13 +150,22 @@ function fig(name, cap) { return name ? `<figure><img src="fig/${name}.png" alt=
 function stars(n, size = "") { let s = ""; for (let i = 1; i <= 5; i++) s += `<span class="star ${i <= Math.round(n) ? "on" : ""} ${size}">★</span>`; return s; }
 
 function header() {
-  const h = location.hash || "#/"; const u = window.DB && DB.user();
-  const links = [["#/", "Home"], ...MODS.map(m => ["#/" + m.id, "M" + m.num]), ["#/videos", "Videos"], ["#/quiz", "Quiz"], ["#/predicted", "Predicted"], ["#/revision", "Revision"], ["#/progress", "My progress"], ...(window.DB && DB.isAdmin && DB.isAdmin() ? [["#/admin", "Admin"]] : [])];
-  $("#nav").innerHTML = links.map(([href, t]) => `<a href="${href}" class="${h.split("?")[0] === href ? "active" : ""}">${t}</a>`).join("");
-  $("#user").innerHTML = u ? `<a class="pdf-link" href="${PDF}" download>Free PDF ↓</a><img src="${esc(u.photoURL || "")}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none'"><span>${esc((u.displayName || "Student").split(" ")[0])}</span><button id="logout" class="link">Sign out</button>` : "";
+  const h = location.hash || "#/"; const u = window.DB && DB.user(); const p = h.split("?")[0];
+  const inWT = /^#\/wt(\/|$)/.test(p), inHome = p === "#/" || p === "#" || p === "";
+  const subj = inWT ? "Web Technology" : inHome ? "Choose subject" : "Neural Networks";
+  const br = document.querySelector(".brand"); if (br) { br.setAttribute("href", "#/"); br.innerHTML = '<span class="dot"></span>Sem 7 Prep <small class="subj-name">' + subj + "</small>"; }
+  let links, tabs;
+  if (inWT && window.WT) { const n = WT.nav(); links = n.links; tabs = n.tabs.map(([href, t, ic, fn]) => [href, t, ic, fn(p)]); }
+  else if (inHome) { links = []; tabs = [["#/", "Subjects", "subj", true]]; }
+  else {
+    links = [["#/nn", "Home"], ...MODS.map(m => ["#/" + m.id, "M" + m.num]), ["#/videos", "Videos"], ["#/quiz", "Quiz"], ["#/predicted", "Predicted"], ["#/revision", "Revision"], ["#/progress", "My progress"], ...(window.DB && DB.isAdmin && DB.isAdmin() ? [["#/admin", "Admin"]] : [])];
+    const isMod = /^#\/(m\d|learn|videos)/.test(p);
+    tabs = [["#/nn", "Home", "home", p === "#/nn"], ["#/learn", "Learn", "learn", isMod], ["#/quiz", "Quiz", "quiz", p === "#/quiz"], ["#/revision", "Revise", "revise", p === "#/revision" || p === "#/predicted"], ["#/progress", "Me", "me", p === "#/progress" || p === "#/admin"]];
+  }
+  const other = inWT ? ["#/nn", "Neural Networks"] : ["#/wt", "Web Technology"];
+  $("#nav").innerHTML = (inHome ? "" : '<a href="#/" class="subj-link">All subjects</a>') + links.map(([href, t]) => `<a href="${href}" class="${p === href ? "active" : ""}">${t}</a>`).join("");
+  $("#user").innerHTML = u ? `${inHome ? "" : `<a class="pdf-link" href="${inWT ? "webtech/WebTech_AM702C_Suggestions_with_Answers.pdf" : PDF}" download>Free PDF ↓</a><a class="pdf-link" href="${other[0]}">Switch: ${other[1]}</a>`}<img src="${esc(u.photoURL || "")}" alt="" referrerpolicy="no-referrer" onerror="this.style.display='none'"><span>${esc((u.displayName || "Student").split(" ")[0])}</span><button id="logout" class="link">Sign out</button>` : "";
   const lo = $("#logout"); if (lo) lo.onclick = () => DB.signOut();
-  const p = h.split("?")[0]; const isMod = /^#\/(m\d|learn|videos)/.test(p);
-  const tabs = [["#/", "Home", "home", p === "#/" || p === "#"], ["#/learn", "Learn", "learn", isMod], ["#/quiz", "Quiz", "quiz", p === "#/quiz"], ["#/revision", "Revise", "revise", p === "#/revision" || p === "#/predicted"], ["#/progress", "Me", "me", p === "#/progress" || p === "#/admin"]];
   $("#tabbar").innerHTML = tabs.map(([href, t, ic, on]) => `<a href="${href}" class="${on ? "on" : ""}" aria-label="${t}">${ICON[ic]}<span>${t}</span></a>`).join("");
 }
 function progressBlock() {
@@ -418,6 +430,9 @@ function toast(msg, bad) { const t = document.createElement("div"); t.className 
 function route() {
   header(); window.scrollTo(0, 0); readProgress(); document.body.dataset.page = (location.hash.split("?")[0] || "#/").replace(/[#/]/g, "") || "home";
   const [path, qs] = (location.hash.slice(1) || "/").split("?"); const params = new URLSearchParams(qs || "");
+  if (/^\/wt(\/|$)/.test(path) && window.WT) { WT.view(path, params); return; }
+  if (path === "/" || path === "") { WT.chooser({ mods: MODS.length, done: Object.keys(P().done || {}).filter(k => (P().done || {})[k]).length, videos: VKEYS().length, widgets: Object.keys(WNAMES).length, mcq: (window.MCQ || []).length }); return; }
+  try { localStorage.setItem("wt_state", JSON.stringify({ ...JSON.parse(localStorage.getItem("wt_state") || "{}"), last: "nn" })); } catch (e) {}
   const m = MODS.find(x => "/" + x.id === path);
   if (m) moduleView(m); else if (path === "/quiz") quiz(params); else if (path === "/predicted") predicted(); else if (path === "/revision") revision(); else if (path === "/progress") progress(); else if (path === "/learn") learn(); else if (path === "/admin") admin(); else if (path === "/videos") videos(params); else home();
 }

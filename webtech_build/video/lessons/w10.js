@@ -1,0 +1,57 @@
+LESSONS.w10 = { id: "w10", title: "JavaScript Functions, Objects, Events, Validation aur CGI", tag: "MODULE 3 · JAVASCRIPT, CGI, SERVLET, JSP, JDBC", part: "Part 2 of 5", scenes: [
+{ tpl: "title", tag: "MODULE 3 · PART 2", h: "Functions, Objects, Events aur CGI", sub: "Factorial, form validation, GET aur POST",
+  lines: ["इस video में JavaScript के functions, objects और events, factorial और form validation के programs, और फिर server side की शुरुआत, यानी CGI scripts और GET और POST methods।"] },
+
+{ tpl: "code", h: "Function: factorial", lang: "js", codeW: 640, ph: 340,
+  code: ["function factorial(n) {", "  var f = 1;", "  for (var i = 1; i <= n; i++) {", "    f = f * i;", "  }", "  return f;", "}", "document.write(factorial(5));"],
+  segs: [[0, 1, 1], [2, 4, 2], [5, 6, 3], [7, 7, 4]],
+  out: { type: "text", l: 4, lines: ["120"] }, oh: 90,
+  notes: [{ t: "Function = code ka **naam wala block**, baar-baar use ho sakta hai", l: 1 }],
+  lines: ["Function code का नाम वाला block है, जिसे बार बार call कर सकते हैं। Function keyword, नाम, brackets में parameters, और curly brackets में body।",
+    "Factorial के लिए f को एक से शुरू करो और i एक से n तक loop चलाकर f में i से गुणा करते जाओ।",
+    "आख़िर में return से result वापस दो।",
+    "Factorial of five call करने पर एक गुणा दो गुणा तीन गुणा चार गुणा पाँच, यानी एक सौ बीस आता है।"] },
+
+{ tpl: "code", h: "Objects", lang: "js", codeW: 700, ph: 330,
+  code: ["var student = {", "   name: \"Ravi\",", "   marks: 85,", "   show: function() { return this.name + \" \" + this.marks; }", "};", "document.write(student.show());", "document.write(Math.sqrt(49));"],
+  segs: [[0, 2, 1], [3, 3, 2], [5, 6, 3]],
+  out: { type: "text", l: 3, lines: ["Ravi 85", "7"] }, oh: 110,
+  notes: [{ t: "Object = **properties** (data) + **methods** (functions). Built-in: Math, Date, String, Array, document, window", l: 3 }],
+  lines: ["Object properties और methods का समूह है। Properties data होती हैं और methods functions।",
+    "यहाँ student object में name और marks properties हैं और show एक method है, जो this keyword से अपनी ही properties use करती है।",
+    "Object की property dot से access करते हैं, जैसे student dot show। JavaScript में पहले से बने objects भी हैं, जैसे Math, Date, String, Array, document और window।"] },
+
+{ tpl: "table", h: "Events", cols: ["Event", "Kab hota hai", "Event", "Kab hota hai"], widths: [20, 30, 20, 30],
+  rows: [["**onclick**", "Element par click", "**onload**", "Page load ho gaya"], ["**onmouseover**", "Mouse upar aaya", "**onchange**", "Input ki value badli"], ["**onmouseout**", "Mouse hata", "**onsubmit**", "Form submit hua"], ["**onkeyup**", "Key chhodi", "**onkeydown**", "Key dabayi"]],
+  lines: ["Event का मतलब page पर कुछ होना, जैसे click, key press या page का load होना। JavaScript इन्हें event handlers से पकड़ती है, जो HTML attributes की तरह लिखे जाते हैं।",
+    "onclick click पर, onmouseover और onmouseout mouse के आने और जाने पर, onkeyup और onkeydown keyboard के लिए।",
+    "onload page के load होने पर, onchange input की value बदलने पर, और onsubmit form submit होने पर।"] },
+
+{ tpl: "code", h: "Form validation: name khali nahi, age number", lang: "html", codeW: 700, ph: 470,
+  code: ["function validate() {", "  var n = document.f.uname.value.trim();", "  var a = document.f.age.value;", "  if (n === \"\") { alert(\"Name khali hai\"); return false; }", "  if (a === \"\" || isNaN(a)) { alert(\"Age number ho\"); return false; }", "  return true;", "}", "<form name=\"f\" onsubmit=\"return validate()\"> ... </form>"],
+  segs: [[0, 2, 1], [3, 3, 2], [4, 4, 3], [5, 6, 4], [7, 7, 5]],
+  notes: [{ t: "**return false** form ko server par jaane se rokta hai. Server par bhi check zaroori", l: 5 }],
+  lines: ["अब form validation, जो exam में बार बार आता है। Question: name खाली न हो और age number हो।",
+    "Function validate में form के fields की values पढ़ो, document dot f dot uname dot value, और trim से extra spaces हटाओ।",
+    "अगर name खाली है तो alert दिखाओ और false return करो। अगर age खाली है या isNaN से number नहीं है, तो भी alert और false।",
+    "सब ठीक हो तो true return करो, और form server पर चला जाएगा।",
+    "Form tag में onsubmit equals return validate। Return false से submit रुक जाता है। ध्यान रखो, client side validation सिर्फ सुविधा है, server पर भी check ज़रूरी है।"] },
+
+{ tpl: "bullets", h: "CGI: server par program chalana", fig: "cgi_flow", colW: 450,
+  items: [{ t: "**CGI** = Common Gateway Interface", sub: "Server bahari program chalata hai (Perl, C, Python)" }, { t: "Har request par **naya process**", sub: "Isliye slow; Servlet threads use karta hai" }, { t: "Data **environment variables** se milta hai" }, { t: "Program **stdout** par header + HTML print karta hai" }],
+  lines: ["अब server side। CGI यानी Common Gateway Interface, एक standard है जिससे web server कोई बाहर का program, जैसे Perl, C या Python, चला सकता है। ये programs cgi bin folder में रहते हैं।",
+    "हर request पर server एक नया process बनाता है। यही CGI की कमज़ोरी है, क्योंकि ये slow है, जबकि Servlet में threads use होते हैं।",
+    "Request का data program को environment variables से मिलता है, और POST data standard input से।",
+    "Program standard output पर Content type header, एक खाली line और फिर HTML print करता है, जो server browser को भेज देता है।"] },
+
+{ tpl: "table", h: "CGI environment variables aur GET vs POST", cols: ["Variable / Method", "Matlab"], widths: [32, 68],
+  rows: [["**REQUEST_METHOD**", "GET ya POST"], ["**QUERY_STRING**", "GET ka data (name=Ravi&age=20)"], ["**CONTENT_LENGTH / CONTENT_TYPE**", "POST data ki size aur type"], ["**REMOTE_ADDR**, SERVER_NAME", "Client ka IP, server ka naam"], ["**GET**", "Data URL mein, visible, chhota, bookmark ho sakta hai"], ["**POST**", "Data body mein, hidden, bada, login / upload ke liye"]],
+  lines: ["CGI के important environment variables। REQUEST METHOD बताता है GET या POST, QUERY STRING में GET का data होता है, CONTENT LENGTH और CONTENT TYPE POST data के बारे में बताते हैं।",
+    "REMOTE ADDR client का IP और SERVER NAME server का नाम।",
+    "अब GET और POST। GET में data URL में जाता है, दिखता है, size limited है और bookmark हो सकता है।",
+    "POST में data request body में छुपा रहता है, size बड़ी हो सकती है, और login और file upload के लिए यही use होता है।"] },
+
+{ tpl: "bullets", h: "Yaad rakho", bullet: "tick",
+  items: ["Function: **function name(params) { return }**; factorial loop", "Object = properties + methods; Math, Date, document", "Events: onclick, onload, onmouseover, onchange, **onsubmit**", "Validation: **return false** submit rokta hai", "CGI: naya process har request; env variables; **GET vs POST**"],
+  lines: ["आज की मुख्य बातें: functions, objects और events, factorial और validation के programs।", "CGI में हर request पर नया process बनता है, और data environment variables से आता है। GET URL में, POST body में।", "अगले video में Servlet, यानी Java server side। धन्यवाद!"] }
+]};

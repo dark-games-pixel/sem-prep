@@ -1,0 +1,57 @@
+LESSONS.w05 = { id: "w05", title: "HTML: Elements, Links, Images, Lists aur Tables", tag: "MODULE 2 · HTML, CSS, DHTML, XML", part: "Part 1 of 4", scenes: [
+{ tpl: "title", tag: "MODULE 2 · PART 1", h: "HTML se pehla web page", sub: "Tags, headings, links, images, lists aur tables",
+  lines: ["Module two में हम web page बनाना सीखेंगे। इस video में HTML की basics: elements, attributes, headings, links, images, lists और tables, हर चीज़ code के साथ और उसका output देखकर।"] },
+
+{ tpl: "analogy", h: "HTML + CSS + JavaScript = ghar", lh: "GHAR", rh: "WEB PAGE",
+  pairs: [["Deewarein aur kamre", "**HTML**: structure"], ["Paint aur furniture", "**CSS**: style"], ["Bijli aur switch", "**JavaScript**: behaviour"]],
+  lines: ["HTML का मतलब है HyperText Markup Language। ये programming language नहीं, markup language है। आप text के आस पास tags लगाते हो और browser समझता है कि ये heading है, ये paragraph है, ये image है।",
+    "घर की तरह सोचो। HTML दीवारें और कमरे हैं, यानी structure। CSS paint और furniture है, यानी style। और JavaScript बिजली और switch है, यानी behaviour।"] },
+
+{ tpl: "code", h: "Pehla page: structure", lang: "html", codeW: 600,
+  code: ["<!DOCTYPE html>", "<html>", "  <head>", "    <title>My First Page</title>", "  </head>", "  <body>", "    <h1>Hello World</h1>", "    <p>Ye mera pehla paragraph hai.</p>", "  </body>", "</html>"],
+  segs: [[0, 1, 1], [2, 4, 2], [5, 9, 3]],
+  out: { type: "browser", url: "first.html", l: 3, html: "<h1 style='font-size:34px;margin:6px 0'>Hello World</h1><p>Ye mera pehla paragraph hai.</p>" }, oh: 250,
+  notes: [{ t: "**Tag**: <p> ... </p>   **Element** = tag + content", l: 4 }, { t: "**head**: title, meta (dikhta nahi)   **body**: page ka content", l: 4 }],
+  lines: ["ये है एक HTML page का ढाँचा। सबसे ऊपर DOCTYPE, जो browser को बताता है कि ये HTML five है, फिर html tag जिसमें सब कुछ आता है।",
+    "Head में title होता है, जो browser के tab में दिखता है, और meta जैसी जानकारी। Head की चीज़ें page पर नहीं दिखतीं।",
+    "Body में वो सब कुछ जो page पर दिखता है, जैसे heading और paragraph।",
+    "ध्यान दो, tag opening और closing के जोड़े में होते हैं, और opening tag, content और closing tag मिलकर element बनाते हैं। कुछ tags empty होते हैं, जैसे br, hr और img।"] },
+
+{ tpl: "table", h: "Attributes, headings aur formatting", cols: ["Cheez", "Syntax", "Kaam"], widths: [22, 40, 38],
+  rows: [["**Attribute**", "<a href=\"x.html\">  <img src alt>", "Tag ki extra jankari: name=\"value\""], ["**Headings**", "<h1> se <h6>", "h1 sabse bada, h6 sabse chhota"], ["**Paragraph, line**", "<p>  <br>  <hr>", "Paragraph, nayi line, horizontal line"], ["**Formatting**", "<b> <i> <u> <sub> <sup>", "Bold, italic, underline, x2, x^2"], ["**Important**", "<strong>  <em>  <mark>", "Meaning ke saath bold / italic / highlight"]],
+  lines: ["अब attributes। Attribute tag की extra जानकारी होती है, name equals value के रूप में, जैसे a tag में href, या img में src और alt।",
+    "Headings h1 से h6 तक होती हैं, h1 सबसे बड़ी।",
+    "Paragraph के लिए p, नई line के लिए br और horizontal line के लिए hr।",
+    "Formatting के लिए bold, italic, underline, subscript और superscript। और strong, em और mark का मतलब भी साथ में होता है।"] },
+
+{ tpl: "code", h: "Links aur Images", lang: "html", codeW: 640,
+  code: ["<a href=\"https://www.google.com\" target=\"_blank\">Google kholo</a>", "<a href=\"#section2\">Neeche jao</a>", "<img src=\"logo.png\" alt=\"College logo\" width=\"120\">"],
+  segs: [[0, 0, 1], [1, 1, 2], [2, 2, 3]],
+  out: { type: "browser", url: "links.html", l: 1, html: "<p><a href='#' style='color:#0645ad'>Google kholo</a></p><p><a href='#' style='color:#0645ad'>Neeche jao</a></p><p style='border:2px dashed #999;width:130px;height:60px;display:grid;place-items:center;color:#666'>logo.png</p>" }, oh: 270,
+  notes: [{ t: "**href** = kahan jana hai   **target=\"_blank\"** = naye tab mein", l: 1 }, { t: "**alt** = image na dikhe to text, screen reader ke liye", l: 3 }],
+  lines: ["Link को anchor tag, यानी a से बनाते हैं। href attribute बताता है कि कहाँ जाना है, और target blank नए tab में खोलता है।",
+    "Hash के साथ link उसी page के अंदर की एक जगह पर ले जाता है।",
+    "Image के लिए img tag, जिसमें src में file का नाम, alt में वैकल्पिक text, और width height। Alt text तब दिखता है जब image load न हो, और screen reader के लिए भी ज़रूरी है।"] },
+
+{ tpl: "code", h: "Lists: ordered, unordered, definition", lang: "html", codeW: 560,
+  code: ["<ol>", "  <li>HTML</li> <li>CSS</li>", "</ol>", "<ul>", "  <li>Servlet</li> <li>JSP</li>", "</ul>", "<dl>", "  <dt>HTTP</dt>", "  <dd>HyperText Transfer Protocol</dd>", "</dl>"],
+  segs: [[0, 2, 1], [3, 5, 2], [6, 9, 3]],
+  out: { type: "browser", url: "lists.html", l: 1, html: "<ol style='margin:0 0 6px 22px'><li>HTML</li><li>CSS</li></ol><ul style='margin:0 0 6px 22px'><li>Servlet</li><li>JSP</li></ul><dl style='margin:0'><dt style='font-weight:bold'>HTTP</dt><dd style='margin-left:22px'>HyperText Transfer Protocol</dd></dl>" }, oh: 300,
+  notes: [{ t: "ol: type=\"1 / a / A / i / I\", start=\"5\"   ul: type=\"disc / circle / square\"", l: 3 }],
+  lines: ["Lists तीन तरह की होती हैं। Ordered list ol, जिसमें numbers या letters आते हैं, और हर item li tag में।",
+    "Unordered list ul, जिसमें bullets आते हैं, जैसे disc, circle या square।",
+    "Definition list dl, जिसमें dt में term और dd में उसका मतलब आता है, जैसे glossary में। Lists को एक दूसरे के अंदर nest भी कर सकते हो।"] },
+
+{ tpl: "code", h: "Tables: rowspan aur colspan", lang: "html", codeW: 640, ph: 400,
+  code: ["<table border=\"1\">", " <tr><th>Day</th><th>9-10</th><th>10-11</th></tr>", " <tr><td>Mon</td><td colspan=\"2\">Web Tech Lab</td></tr>", " <tr><td rowspan=\"2\">Tue</td><td>AI</td><td>ML</td></tr>", " <tr><td>NNDL</td><td>Web Tech</td></tr>", "</table>"],
+  segs: [[0, 1, 1], [2, 2, 2], [3, 4, 3]],
+  out: { type: "browser", url: "table.html", l: 1, html: "<table border='1' cellpadding='7' cellspacing='0' style='border-collapse:collapse;font-size:18px'><tr><th>Day</th><th>9-10</th><th>10-11</th></tr><tr><td>Mon</td><td colspan='2' align='center'>Web Tech Lab</td></tr><tr><td rowspan='2'>Tue</td><td>AI</td><td>ML</td></tr><tr><td>NNDL</td><td>Web Tech</td></tr></table>" }, oh: 270,
+  notes: [{ t: "**tr** = row, **th** = heading cell, **td** = data cell", l: 1 }, { t: "**colspan** = sideways merge, **rowspan** = neeche merge. Spanned cell wali jagah ka td mat likho", l: 3 }],
+  lines: ["Table में table tag पूरी table, tr हर row, th heading cell जो bold और center होता है, और td data cell।",
+    "Colspan दो का मतलब cell दो columns में फैलेगी, यानी sideways merge। जैसे Monday की lab।",
+    "Rowspan दो का मतलब cell दो rows में फैलेगी, यानी नीचे की तरफ merge। ध्यान रखना, जिस row में cell पहले से cover हो गई है, उसमें उस column का td मत लिखो।"] },
+
+{ tpl: "bullets", h: "Yaad rakho", bullet: "tick",
+  items: ["HTML = **markup**, structure; head (title, meta) aur body (content)", "**Attribute** name=\"value\"; headings h1-h6; empty tags br, hr, img", "Link <a href>, image <img src alt>", "Lists: **ol, ul, dl** (dt, dd)", "Table: tr, th, td; **colspan** sideways, **rowspan** down"],
+  lines: ["आज की मुख्य बातें: HTML structure बताता है, head और body दो हिस्से होते हैं।", "Attributes, headings, links, images, तीन तरह की lists और tables के rowspan और colspan याद रखो।", "अगले video में forms, iframe, colors और image maps देखेंगे। धन्यवाद!"] }
+]};

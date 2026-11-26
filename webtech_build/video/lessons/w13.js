@@ -1,0 +1,55 @@
+LESSONS.w13 = { id: "w13", title: "ODBC, JDBC, PreparedStatement aur JSP Login Program", tag: "MODULE 3 · JAVASCRIPT, CGI, SERVLET, JSP, JDBC", part: "Part 5 of 5", scenes: [
+{ tpl: "title", tag: "MODULE 3 · PART 5", h: "Database se connection: ODBC aur JDBC", sub: "Statement, PreparedStatement, CallableStatement aur login program",
+  lines: ["Module three का आख़िरी video। इसमें देखेंगे कि Java program database से कैसे जुड़ता है, यानी ODBC और JDBC, तीन तरह के statements, और फिर JSP login page का पूरा program।"] },
+
+{ tpl: "bullets", h: "ODBC aur JDBC", fig: "jdbc_arch", colW: 440,
+  items: [{ t: "**ODBC** = Open Database Connectivity", sub: "Microsoft ka language-independent standard" }, { t: "**DSN** (Data Source Name) pehle banate hain", sub: "Control Panel > ODBC Data Sources > Add" }, { t: "**JDBC** = Java ko database se jodne ki API", sub: "java.sql package" }, { t: "App -> **DriverManager** -> **Driver** -> Database" }],
+  lines: ["ODBC यानी Open Database Connectivity, Microsoft का standard है जो किसी भी language को database से जोड़ता है। इसे use करने के लिए पहले Windows में एक DSN बनाते हैं, यानी Data Source Name, जो database का registered नाम होता है।",
+    "JDBC यानी Java Database Connectivity, Java program को database से जोड़ने की API है, java dot sql package में।",
+    "पहले Java में JDBC ODBC bridge से ODBC use होता था। अब हर database का अपना JDBC driver होता है।",
+    "Architecture में Java application JDBC API से DriverManager को बोलती है, जो सही driver चुनता है, और driver database से बात करता है।"] },
+
+{ tpl: "flow", h: "JDBC ke steps", dir: "v", w: 780,
+  steps: [{ t: "1. Driver load: Class.forName(\"com.mysql.cj.jdbc.Driver\")", c: "sky" }, { t: "2. Connection: DriverManager.getConnection(url, user, pwd)", c: "teal" }, { t: "3. Statement: con.prepareStatement(sql)", c: "amber" }, { t: "4. Execute: executeQuery() / executeUpdate()", c: "green" }, { t: "5. Result: while (rs.next()) { rs.getString(\"name\"); }", c: "sky" }, { t: "6. Close: rs, ps, con", c: "rose" }],
+  side: [],
+  lines: ["JDBC के छह steps याद रखो। पहला, driver load करो, Class dot forName से।",
+    "दूसरा, DriverManager के getConnection से connection लो, जिसमें database का url, user और password देते हैं।",
+    "तीसरा, connection से statement बनाओ। चौथा, उसे execute करो।",
+    "SELECT के लिए executeQuery, जो ResultSet देता है, और INSERT UPDATE DELETE के लिए executeUpdate, जो प्रभावित rows की गिनती देता है।",
+    "पाँचवाँ, ResultSet के next method से rows पर loop चलाओ और getString जैसे methods से columns पढ़ो।",
+    "और आख़िर में सब कुछ close करो।"] },
+
+{ tpl: "table", h: "Statement, PreparedStatement, CallableStatement", cols: ["Type", "Kaam", "Khaas baat"], widths: [26, 34, 40],
+  rows: [["**Statement**", "Simple static SQL", "Har baar compile; SQL injection ka **khatra**"], ["**PreparedStatement**", "? placeholders wali query", "**Pre-compiled**, tez, **SQL injection se surakshit**"], ["**CallableStatement**", "Database ke **stored procedure** call", "con.prepareCall(\"{call getMarks(?)}\")"]],
+  lines: ["तीन तरह के statements। Statement में पूरी SQL string जोड़कर बनाते हैं, और ये हर बार compile होती है। इसमें SQL injection का खतरा है।",
+    "PreparedStatement में सवालिया निशान placeholders होते हैं, query एक बार compile होती है और बार बार चलती है, और input को सिर्फ data माना जाता है, इसलिए SQL injection से सुरक्षित है।",
+    "CallableStatement database के stored procedures को call करने के लिए है।"] },
+
+{ tpl: "code", h: "SQL injection: Statement ka khatra", lang: "java", codeW: 740, ph: 330,
+  code: ["// Statement: string jodkar", "\"SELECT * FROM users WHERE name='\" + name + \"' AND pwd='\" + pwd + \"'\"", "", "// pwd = ' OR '1'='1   ->  query hamesha TRUE", "", "// PreparedStatement:", "ps = con.prepareStatement(\"SELECT * FROM users WHERE name=? AND pwd=?\");", "ps.setString(1, name);  ps.setString(2, pwd);"],
+  segs: [[0, 1, 1], [3, 3, 2], [5, 7, 3]],
+  notes: [{ t: "PreparedStatement input ko **sirf text** samajhta hai, SQL nahi", l: 3 }],
+  lines: ["SQL injection समझते हैं। Statement में name और password string में जोड़े जाते हैं।",
+    "अगर attacker password की जगह quote OR quote one equals quote one डाल दे, तो query हमेशा true हो जाती है और वो बिना password के login कर लेता है।",
+    "PreparedStatement में placeholders पर setString से values भरी जाती हैं, और वो input को सिर्फ text समझता है, SQL नहीं, इसलिए ये attack नहीं चलता।"] },
+
+{ tpl: "bullets", h: "JSP login: poora flow", fig: "jsp_login_flow", colW: 440,
+  items: [{ t: "**login.jsp**: HTML form (user, password)" }, { t: "**check.jsp**: scriptlet + PreparedStatement" }, { t: "Mila to **<jsp:forward>** welcome.jsp" }, { t: "Nahi mila to **Invalid login** message" }],
+  lines: ["अब exam का सबसे बड़ा program, JSP login page। पहले flow समझो।",
+    "login dot jsp में HTML form है, जो user name और password लेकर POST से check dot jsp को भेजता है।",
+    "check dot jsp में scriptlet है, जो PreparedStatement से database में user ढूँढता है। अगर मिल गया तो jsp forward से welcome dot jsp पर भेजता है।",
+    "और न मिले तो Invalid login का message दिखाकर login page फिर से दिखाता है।"] },
+
+{ tpl: "code", h: "check.jsp: scriptlet + PreparedStatement + forward", lang: "jsp", codeW: 760, ph: 480,
+  code: ["<%@ page import=\"java.sql.*\" %>", "<% String user = request.getParameter(\"uname\");", "   String pass = request.getParameter(\"pwd\");", "   Class.forName(\"com.mysql.cj.jdbc.Driver\");", "   Connection con = DriverManager.getConnection(", "        \"jdbc:mysql://localhost:3306/college\", \"root\", \"root\");", "   PreparedStatement ps = con.prepareStatement(", "        \"SELECT * FROM users WHERE uname=? AND pwd=?\");", "   ps.setString(1, user);  ps.setString(2, pass);", "   ResultSet rs = ps.executeQuery();", "   if (rs.next()) { %> <jsp:forward page=\"welcome.jsp\"/> <% }", "   else { out.println(\"Invalid login\"); }", "   con.close(); %>"],
+  segs: [[0, 2, 1], [3, 5, 2], [6, 8, 3], [9, 10, 4], [11, 12, 5]],
+  lines: ["ये check dot jsp का code है। सबसे ऊपर page directive से java dot sql package import, फिर request से user name और password पढ़ते हैं।",
+    "Driver load करते हैं और DriverManager से database से connection लेते हैं।",
+    "PreparedStatement बनाते हैं, जिसमें दो सवालिया निशान हैं, और setString से user और password भरते हैं।",
+    "Query execute करके ResultSet लेते हैं। rs dot next अगर true है तो user मिल गया, और jsp forward से welcome page पर चले जाते हैं।",
+    "वरना Invalid login लिखते हैं, और आख़िर में connection बंद करते हैं। Real project में password hash करके रखते हैं, plain text नहीं।"] },
+
+{ tpl: "bullets", h: "Yaad rakho", bullet: "tick",
+  items: ["**ODBC** + **DSN**; **JDBC** = Java ki database API (java.sql)", "Steps: **driver, connection, statement, execute, result, close**", "executeQuery -> ResultSet; executeUpdate -> row count", "**PreparedStatement** = pre-compiled + SQL injection se surakshit", "**CallableStatement** = stored procedure"],
+  lines: ["Module three पूरा हुआ। ODBC, DSN और JDBC के steps याद रखो।", "PreparedStatement क्यों बेहतर है और CallableStatement क्या करता है, ये अक्सर पूछा जाता है।", "और login program में form, scriptlet, PreparedStatement और forward, सब लिखना है। अगले video से Module four, security। धन्यवाद!"] }
+]};

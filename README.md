@@ -1,4 +1,4 @@
-# AM701 Neural Networks & Deep Learning — Firebase app
+# Semester 7 prep — Firebase app (AM702C Web Technology + AM701 Neural Networks & Deep Learning)
 
 Frontend: **Firebase Hosting** (static site in `public/`).
 Backend: **Firebase Authentication (Google)** + **Cloud Firestore** (progress, quiz history, module reviews, protected by `firestore.rules`) + optional **Cloud Function** (`functions/`) that keeps review averages per module.
@@ -37,3 +37,26 @@ Edit `public/data/extra.js` → `VIDEOS.p01 … p10` → paste each unlisted lin
 
 ## Note on access control
 Google sign-in gates the whole interface, and all saved data is protected by Firestore rules. The static course files themselves are still served by Hosting, so someone who knows an exact file URL could download it directly (the PDF is meant to be free anyway). For fully private content you would serve it from Firestore/Storage behind rules.
+
+
+## Subjects
+The app opens on a **subject chooser** (`#/`). Each subject has its own nav and content:
+
+| Subject | Routes | Data |
+|---|---|---|
+| AM701 Neural Networks | `#/nn`, `#/m1`..`#/m5`, `#/videos`, `#/quiz` | `public/data/*`, `public/js/app.js` |
+| AM702C Web Technology | `#/wt`, `#/wt/m1`..`#/wt/m4`, `#/wt/videos`, `#/wt/exam`, `#/wt/quiz`, `#/wt/revise` | `public/webtech/*` (`js/wt.js`, `js/widgets.js` p5.js animations, `wt.css`) |
+
+Web Technology progress is stored in the browser (localStorage); AM701 keeps using Firestore. No Firestore rule change is needed.
+
+## Web Technology: what is where
+- Notes (Hinglish, beginner): `public/webtech/data/m1..m4.js`. Quiz: `data/mcq.js` (138 MCQs). Videos list + YouTube links: `data/videos.js`.
+- Teacher's suggestion answers (23) and the black-and-white PDF come from one source: `webtech_build/answers_a.py`, `answers_b.py`. Rebuild with `python3 webtech_build/build_pdf.py` (writes the PDF, `data/answers.js`, copies figures). Diagrams: `python3 webtech_build/make_figs.py`.
+- Video lessons: scripts in `webtech_build/video/lessons/wNN.js` (scene data, narration in Devanagari + English terms).
+  ```bash
+  cd webtech_build
+  python3 make_video.py all w09 w10 ...     # Sarvam Bulbul v3 voice (cached per line), Chrome frames, CodeMaster audio mix, MP4
+  python3 gen_videos.py && python3 posters.py   # refresh data/videos.js and posters
+  ```
+  MP4s land in `webtech_videos/` (not deployed). Upload to YouTube (unlisted), paste each link into `yt: ""` in `data/videos.js`, then `firebase deploy --only hosting`.
+  The voice needs `SARVAM_API_KEY` with credits (read from the CodeMaster `backend/.env`; override the repo path with `CODEMASTER_REPO`).
